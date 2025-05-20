@@ -2009,19 +2009,8 @@ function calculateAll() {
  * @param {string} mode - 'pdf' or 'print'
  */
 function preparePdfOrPrint(mode) {
-    // Add date stamp for printing - FIXED: Add check for element existence
-    const profitSection = document.querySelector('.profit-section, .result-section');
-    
-    if (profitSection) {
-        profitSection.setAttribute('data-print-date', new Date().toLocaleDateString());
-    } else {
-        console.warn('Profit section element not found. Adding date stamp to summary content instead.');
-        // Fallback to another container element that should exist
-        const summaryContent = document.getElementById('summaryContent');
-        if (summaryContent) {
-            summaryContent.setAttribute('data-print-date', new Date().toLocaleDateString());
-        }
-    }
+    // Add date stamp for printing
+    document.querySelector('.profit-section').setAttribute('data-print-date', new Date().toLocaleDateString());
     
     if (mode === 'print') {
         // Show print preview modal first
@@ -2030,6 +2019,7 @@ function preparePdfOrPrint(mode) {
         generatePDF();
     }
 }
+
 /**
  * Show print preview modal
  */
@@ -2111,24 +2101,17 @@ function generatePDF() {
         showNotification("Preparing PDF...", "info");
         
         try {
-            // Get the quote summary section with a more robust selector
-            const quoteSummary = document.querySelector('#summaryContent');
-            
-            if (!quoteSummary) {
-                throw new Error('Summary content element not found');
-            }
-            
-            // Create a clone of results section to avoid modifying the original
-            const quoteSummaryClone = quoteSummary.cloneNode(true);
+            // Create a clone of results section
+            const quoteSummary = document.querySelector('#summaryContent').cloneNode(true);
             
             // Remove action buttons from the clone
-            const actionButtons = quoteSummaryClone.querySelector('.action-buttons');
+            const actionButtons = quoteSummary.querySelector('.action-buttons');
             if (actionButtons) {
                 actionButtons.remove();
             }
             
             // Style modifications for PDF
-            const elements = quoteSummaryClone.querySelectorAll('.result-section, .profit-section');
+            const elements = quoteSummary.querySelectorAll('.result-section, .profit-section');
             elements.forEach(el => {
                 el.style.backgroundColor = 'white';
                 el.style.boxShadow = 'none';
@@ -2146,32 +2129,14 @@ function generatePDF() {
                 day: 'numeric'
             });
             
-            // Verify if jsPDF constructor is available
-            let doc;
-            if (typeof window.jspdf !== 'undefined' && window.jspdf.jsPDF) {
-                // Modern UMD version
-                const { jsPDF } = window.jspdf;
-                doc = new jsPDF({
-                    orientation: 'p',
-                    unit: 'pt',
-                    format: 'a4',
-                    compress: true
-                });
-            } else if (typeof jsPDF !== 'undefined') {
-                // Older version or directly available
-                doc = new jsPDF({
-                    orientation: 'p',
-                    unit: 'pt',
-                    format: 'a4',
-                    compress: true
-                });
-            } else {
-                throw new Error('jsPDF library not properly loaded');
-            }
-            
-            if (!doc) {
-                throw new Error('Failed to create PDF document');
-            }
+            // Set up PDF document
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: 'p',
+                unit: 'pt',
+                format: 'a4',
+                compress: true
+            });
             
             // Define colors
             const brandBlue = '#03143A';
@@ -2204,13 +2169,8 @@ function generatePDF() {
                 day: 'numeric'
             })}`, 300, 100);
             
-            // Check if html2canvas is available
-            if (typeof html2canvas === 'undefined') {
-                throw new Error('html2canvas library not loaded');
-            }
-            
             // Use html2canvas to render the quote content
-            html2canvas(quoteSummaryClone, {
+            html2canvas(quoteSummary, {
                 scale: 2,
                 useCORS: true,
                 logging: false,
@@ -2257,14 +2217,14 @@ function generatePDF() {
                 showNotification("PDF generated successfully!", "success");
             }).catch(err => {
                 console.error('Error generating PDF:', err);
-                showNotification("Error generating PDF: " + err.message, "error");
+                showNotification("Error generating PDF. Please try again.", "error");
             });
         } catch (error) {
             console.error('PDF generation error:', error);
-            showNotification("PDF generation failed: " + error.message, "error");
+            showNotification("PDF generation failed. Please try printing instead.", "error");
         }
     } else {
-        showNotification("PDF libraries not loaded. Please check your internet connection and try again.", "warning");
+        showNotification("PDF libraries not loaded. Please try printing instead.", "warning");
     }
 }
 
