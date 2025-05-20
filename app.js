@@ -7,7 +7,7 @@
  * Allows for detailed cost breakdowns, profit optimization, and professional quote generation.
  * 
  * @author Christian Reyes
- * @version 2.3
+ * @version 2.4.0
  */
 
 // ===== Application State =====
@@ -71,7 +71,11 @@ const state = {
         sectionStates: {},
         operationalCostsExpanded: false,
         isDarkMode: false,
-        isCalculating: false
+        isCalculating: false,
+        hasUnsavedConfigChanges: false,
+        highlightedElements: new Set(),
+        valueHistory: {}, // For tracking value changes
+        toastQueue: []
     },
     
     // Calculation results cache
@@ -120,6 +124,16 @@ const state = {
 const formatCurrency = amount => '$' + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
 
 /**
+ * Extract numeric value from currency string
+ * @param {string} str - Currency string
+ * @returns {number} - Extracted numeric value
+ */
+const extractNumericValue = str => {
+    if (typeof str !== 'string') return 0;
+    return parseFloat(str.replace(/[^0-9.-]+/g, '')) || 0;
+};
+
+/**
  * Round an amount using the desired method.
  * @param {number} amount - Value to round.
  * @param {'up'|'down'|'nearest'} method - Rounding mode.
@@ -157,6 +171,89 @@ const calculateMarkupPercentage = (days) => {
  */
 const deepClone = (obj) => {
     return JSON.parse(JSON.stringify(obj));
+};
+
+/**
+ * Highlight an element to draw attention to changes
+ * @param {string} id - Element ID to highlight
+ * @param {string} [className='highlight-change'] - Class to add for highlighting
+ * @param {number} [duration=1500] - Duration of the highlight in milliseconds
+ */
+const highlightElement = (id, className = 'highlight-change', duration = 1500) => {
+    const el = $(id);
+    if (!el) return;
+    
+    // Don't highlight if this element is already highlighted
+    if (state.ui.highlightedElements.has(id)) return;
+    
+    // Store current value for comparison
+    const currentValue = el.textContent;
+    const previousValue = state.ui.valueHistory[id] || currentValue;
+    
+    // Check if value has changed significantly (more than 0.5%)
+    const oldValue = extractNumericValue(previousValue);
+    const newValue = extractNumericValue(currentValue);
+    
+    if (!isNaN(oldValue) && !isNaN(newValue) && oldValue !== 0) {
+        const percentChange = Math.abs((newValue - oldValue) / oldValue) * 100;
+        
+        if (percentChange > 0.5) {
+            // Add to set of highlighted elements
+            state.ui.highlightedElements.add(id);
+            
+            // Add special class for an increase or decrease
+            const changeClass = newValue > oldValue ? 'value-increased' : 'value-decreased';
+            el.classList.add(className, changeClass);
+            
+            // Show notification for significant changes (more than 15%)
+            if (percentChange > 15) {
+                const changeType = newValue > oldValue ? 'increased' : 'decreased';
+                const message = `<strong>${el.closest('.result-row, .profit-row, .result-total')?.querySelector('.label')?.textContent || 'Value'}</strong> ${changeType} by ${Math.round(percentChange)}%`;
+                queueToast(message, changeType === 'increased' ? 'warning' : 'success');
+            }
+            
+            // Remove the highlight after duration
+            setTimeout(() => {
+                el.classList.remove(className, changeClass);
+                state.ui.highlightedElements.delete(id);
+            }, duration);
+        }
+    }
+    
+    // Update stored value
+    state.ui.valueHistory[id] = currentValue;
+};
+
+/**
+ * Queue a toast notification
+ * @param {string} message - Message to display
+ * @param {string} [type='info'] - Notification type
+ */
+const queueToast = (message, type = 'info') => {
+    state.ui.toastQueue.push({ message, type });
+    
+    // If this is the only item in the queue, show it immediately
+    if (state.ui.toastQueue.length === 1) {
+        processToastQueue();
+    }
+};
+
+/**
+ * Process the toast queue
+ */
+const processToastQueue = () => {
+    if (state.ui.toastQueue.length === 0) return;
+    
+    const { message, type } = state.ui.toastQueue[0];
+    showNotification(message, type);
+    
+    // Remove from queue and process next item after delay
+    setTimeout(() => {
+        state.ui.toastQueue.shift();
+        if (state.ui.toastQueue.length > 0) {
+            processToastQueue();
+        }
+    }, 3500); // Slightly longer than notification display time
 };
 
 /**
@@ -211,10 +308,12 @@ const updateUndoRedoButtons = () => {
     
     if (undoBtn) {
         undoBtn.disabled = state.history.currentIndex <= 0;
+        undoBtn.setAttribute('aria-disabled', state.history.currentIndex <= 0);
     }
     
     if (redoBtn) {
         redoBtn.disabled = state.history.currentIndex >= state.history.snapshots.length - 1;
+        redoBtn.setAttribute('aria-disabled', state.history.currentIndex >= state.history.snapshots.length - 1);
     }
 };
 
@@ -262,6 +361,7 @@ const applySnapshot = (index) => {
 const undo = () => {
     if (state.history.currentIndex > 0) {
         applySnapshot(state.history.currentIndex - 1);
+        queueToast('Changes undone', 'info');
     }
 };
 
@@ -271,6 +371,7 @@ const undo = () => {
 const redo = () => {
     if (state.history.currentIndex < state.history.snapshots.length - 1) {
         applySnapshot(state.history.currentIndex + 1);
+        queueToast('Changes restored', 'info');
     }
 };
 
@@ -349,6 +450,30 @@ const setLoadingState = (isLoading) => {
     document.body.classList.toggle('loading', isLoading);
 };
 
+/**
+ * Check if browser supports required features
+ * @returns {Object} - Object with support status for each feature
+ */
+const checkBrowserSupport = () => {
+    const support = {
+        html2canvas: typeof html2canvas !== 'undefined',
+        jsPDF: typeof window.jspdf !== 'undefined' || typeof jsPDF !== 'undefined',
+        localStorage: false,
+        downloadAPI: 'download' in document.createElement('a')
+    };
+    
+    // Check localStorage
+    try {
+        localStorage.setItem('test', 'test');
+        localStorage.removeItem('test');
+        support.localStorage = true;
+    } catch (e) {
+        support.localStorage = false;
+    }
+    
+    return support;
+};
+
 // ===== Event Handlers =====
 
 /**
@@ -356,13 +481,37 @@ const setLoadingState = (isLoading) => {
  */
 function initEventListeners() {
     // Tab navigation
-    $('quotationTab').addEventListener('click', () => showContent('quotationContent'));
+    $('quotationTab').addEventListener('click', () => {
+        // Check for unsaved changes in config
+        if (state.ui.hasUnsavedConfigChanges) {
+            if (confirm('You have unsaved changes in Configuration. Would you like to save them before leaving?')) {
+                $('saveConfigBtn').click();
+            } else {
+                state.ui.hasUnsavedConfigChanges = false;
+                updateUnsavedChangesIndicator();
+            }
+        }
+        showContent('quotationContent');
+    });
+    
     $('configTab').addEventListener('click', () => showContent('configContent'));
+    
     $('breakdownTab').addEventListener('click', () => {
+        // Check for unsaved changes in config
+        if (state.ui.hasUnsavedConfigChanges) {
+            if (confirm('You have unsaved changes in Configuration. Would you like to save them before leaving?')) {
+                $('saveConfigBtn').click();
+            } else {
+                state.ui.hasUnsavedConfigChanges = false;
+                updateUnsavedChangesIndicator();
+            }
+        }
+        
         showContent('quotationContent');
         const resultsEl = document.querySelector('.results-column') || document.querySelector('.result-section');
         if (resultsEl) resultsEl.scrollIntoView({behavior: 'smooth'});
     });
+    
     $('resetBtn').addEventListener('click', resetCalculator);
     $('darkModeToggle').addEventListener('click', toggleDarkMode);
     
@@ -410,6 +559,12 @@ function initEventListeners() {
         if (e.target.type === 'number' || e.target.classList.contains('commission-split-input')) {
             handleNumericInput(e.target);
         }
+        
+        // Track configuration changes
+        if (e.target.closest('#configContent')) {
+            state.ui.hasUnsavedConfigChanges = true;
+            updateUnsavedChangesIndicator();
+        }
     }, 300));
     
     // Add commission split button
@@ -445,6 +600,10 @@ function initEventListeners() {
         state.config.workCompRate = parseFloat($('workCompRate').value) || 1.88;
         state.config.glRate = parseFloat($('glRate').value) || 7.33;
         
+        // Reset unsaved changes indicator
+        state.ui.hasUnsavedConfigChanges = false;
+        updateUnsavedChangesIndicator();
+        
         // Update UI elements that display configuration values
         updateHoodPriceLabels();
         updateInsuranceDetails();
@@ -466,15 +625,16 @@ function initEventListeners() {
     
     $('screenshotBtn').addEventListener('click', captureScreenshot);
     
-    // Modal close button
-    const closeModalBtn = document.querySelector('.close-modal');
-    if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', function() {
-            const modal = $('screenshotModal');
-            modal.classList.remove('visible');
-            setTimeout(() => { modal.style.display = 'none'; }, 300);
+    // Modal close buttons
+    document.querySelectorAll('.close-modal').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const modal = this.closest('.modal');
+            if (modal) {
+                modal.classList.remove('visible');
+                setTimeout(() => { modal.style.display = 'none'; }, 300);
+            }
         });
-    }
+    });
     
     // Initialize profit options classes
     updateProfitOptionClasses();
@@ -494,6 +654,58 @@ function initEventListeners() {
     
     // Save initial state for undo/redo
     saveSnapshot();
+    
+    // Add input event listeners for config fields to track changes
+    document.querySelectorAll('#configContent input').forEach(input => {
+        input.addEventListener('change', () => {
+            state.ui.hasUnsavedConfigChanges = true;
+            updateUnsavedChangesIndicator();
+        });
+    });
+    
+    // Add undo/redo button listeners
+    if ($('undoBtn')) {
+        $('undoBtn').addEventListener('click', undo);
+    }
+    
+    if ($('redoBtn')) {
+        $('redoBtn').addEventListener('click', redo);
+    }
+    
+    // Check browser support
+    const support = checkBrowserSupport();
+    
+    // Alert for missing features
+    if (!support.html2canvas || !support.jsPDF) {
+        const missingFeatures = [];
+        if (!support.html2canvas) missingFeatures.push('HTML2Canvas (screenshot capture)');
+        if (!support.jsPDF) missingFeatures.push('jsPDF (PDF generation)');
+        
+        showNotification(`Some features are not available: ${missingFeatures.join(', ')}. Please check your internet connection.`, 'warning', 8000);
+    }
+}
+
+/**
+ * Update the unsaved changes indicator
+ */
+function updateUnsavedChangesIndicator() {
+    const configTab = $('configTab');
+    if (!configTab) return;
+    
+    if (state.ui.hasUnsavedConfigChanges) {
+        if (!configTab.querySelector('.unsaved-indicator')) {
+            const indicator = document.createElement('span');
+            indicator.className = 'unsaved-indicator';
+            indicator.setAttribute('aria-label', 'Unsaved changes');
+            indicator.textContent = '*';
+            configTab.appendChild(indicator);
+        }
+    } else {
+        const indicator = configTab.querySelector('.unsaved-indicator');
+        if (indicator) {
+            indicator.remove();
+        }
+    }
 }
 
 /**
@@ -501,6 +713,12 @@ function initEventListeners() {
  * @param {HTMLInputElement} checkbox - The checkbox that changed
  */
 function handleCheckboxChange(checkbox) {
+    // Track configuration changes
+    if (checkbox.closest('#configContent')) {
+        state.ui.hasUnsavedConfigChanges = true;
+        updateUnsavedChangesIndicator();
+    }
+    
     const checkboxHandlers = {
         'enableInitialFee': checked => {
             state.options.enableInitialFee = checked;
@@ -782,12 +1000,17 @@ function updateProfitOptionClasses() {
     if (state.options.enableAutoCostOptimization) {
         optimizeCostOption.classList.add('active');
         customMarkupOption.classList.add('disabled');
+        // Add accessibility attributes
+        optimizeCostOption.setAttribute('aria-selected', true);
+        customMarkupOption.setAttribute('aria-disabled', true);
     } else if (state.options.useCustomMarkup) {
         customMarkupOption.classList.add('active');
+        customMarkupOption.setAttribute('aria-selected', true);
     }
     
     if (state.options.enableResidualPercentage) {
         residualOption.classList.add('active');
+        residualOption.setAttribute('aria-selected', true);
     }
 }
 
@@ -845,7 +1068,7 @@ function updateCommissionSplitInputs() {
         // Add delete button if more than 2 splits
         if (state.options.commissionSplits.length > 2) {
             const deleteBtn = document.createElement('button');
-            deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+            deleteBtn.innerHTML = '<i class="fas fa-times" aria-hidden="true"></i>';
             deleteBtn.style.marginLeft = '5px';
             deleteBtn.style.background = '#e74c3c';
             deleteBtn.style.color = 'white';
@@ -854,6 +1077,7 @@ function updateCommissionSplitInputs() {
             deleteBtn.style.padding = '3px 6px';
             deleteBtn.style.cursor = 'pointer';
             deleteBtn.dataset.index = index;
+            deleteBtn.setAttribute('aria-label', `Remove Commission ${index+1}`);
             deleteBtn.addEventListener('click', function() {
                 const idx = parseInt(this.dataset.index);
                 state.options.commissionSplits.splice(idx, 1);
@@ -903,6 +1127,9 @@ function updateCommissionSplitDisplay(splitCommissions) {
             
             if (percentageDisplay) percentageDisplay.textContent = commission.percentage;
             if (valueDisplay) valueDisplay.textContent = formatCurrency(commission.amount);
+            
+            // Highlight if values changed
+            if (valueDisplay) highlightElement(valueDisplay.id || `commission-split-value-${index}`);
         }
     });
 }
@@ -911,8 +1138,9 @@ function updateCommissionSplitDisplay(splitCommissions) {
  * Show notification to user
  * @param {string} message - Message to display
  * @param {string} type - Notification type (success, error, warning)
+ * @param {number} [duration=3000] - How long to show the notification
  */
-function showNotification(message, type = 'info') {
+function showNotification(message, type = 'info', duration = 3000) {
     // Check if notification container exists
     let container = document.querySelector('.notification-container');
     
@@ -920,6 +1148,8 @@ function showNotification(message, type = 'info') {
     if (!container) {
         container = document.createElement('div');
         container.className = 'notification-container';
+        container.setAttribute('role', 'alert');
+        container.setAttribute('aria-live', 'polite');
         document.body.appendChild(container);
         
         // Add styles if not already in CSS
@@ -940,7 +1170,7 @@ function showNotification(message, type = 'info') {
                     width: 300px;
                     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                     position: relative;
-                    animation: slide-in 0.3s ease, fade-out 0.5s ease 2.5s forwards;
+                    animation: slide-in 0.3s ease, fade-out 0.5s ease ${(duration - 500) / 1000}s forwards;
                     color: white;
                 }
                 .notification-success {
@@ -971,6 +1201,43 @@ function showNotification(message, type = 'info') {
                     from { opacity: 1; }
                     to { opacity: 0; }
                 }
+                .highlight-change {
+                    position: relative;
+                    z-index: 1;
+                    animation: highlight-pulse 1.5s ease-out;
+                }
+                @keyframes highlight-pulse {
+                    0% { background-color: transparent; }
+                    20% { background-color: rgba(39, 174, 96, 0.2); }
+                    100% { background-color: transparent; }
+                }
+                .value-increased {
+                    position: relative;
+                }
+                .value-increased::after {
+                    content: "↑";
+                    color: var(--danger-red);
+                    position: absolute;
+                    right: -15px;
+                    top: 0;
+                    font-weight: bold;
+                }
+                .value-decreased {
+                    position: relative;
+                }
+                .value-decreased::after {
+                    content: "↓";
+                    color: var(--success-green);
+                    position: absolute;
+                    right: -15px;
+                    top: 0;
+                    font-weight: bold;
+                }
+                .unsaved-indicator {
+                    color: var(--warning-orange);
+                    font-weight: bold;
+                    margin-left: 5px;
+                }
             `;
             document.head.appendChild(style);
         }
@@ -981,16 +1248,16 @@ function showNotification(message, type = 'info') {
     notification.className = `notification notification-${type}`;
     notification.innerHTML = `
         ${message}
-        <span class="notification-close">&times;</span>
+        <span class="notification-close" aria-label="Close notification">&times;</span>
     `;
     
     // Add to container
     container.appendChild(notification);
     
-    // Auto remove after 3 seconds
+    // Auto remove after duration
     setTimeout(() => {
         notification.remove();
-    }, 3000);
+    }, duration);
     
     // Close button functionality
     notification.querySelector('.notification-close').addEventListener('click', () => {
@@ -1013,10 +1280,14 @@ function toggleSection(sectionId, button) {
         section.classList.remove('hidden-section');
         icon.className = 'fas fa-chevron-up';
         state.ui.sectionStates[sectionId] = 'open';
+        button.setAttribute('aria-expanded', 'true');
+        section.setAttribute('aria-hidden', 'false');
     } else {
         section.classList.add('hidden-section');
         icon.className = 'fas fa-chevron-down';
         state.ui.sectionStates[sectionId] = 'closed';
+        button.setAttribute('aria-expanded', 'false');
+        section.setAttribute('aria-hidden', 'true');
     }
 }
 
@@ -1108,7 +1379,11 @@ function resetCalculator() {
         ui: {
             sectionStates: uiSectionStates,
             operationalCostsExpanded: false,
-            isDarkMode: isDarkMode
+            isDarkMode: isDarkMode,
+            hasUnsavedConfigChanges: false,
+            highlightedElements: new Set(),
+            valueHistory: {},
+            toastQueue: []
         }
     });
     
@@ -1123,6 +1398,7 @@ function resetCalculator() {
     calculateAll();
     showContent('quotationContent');
     saveSnapshot();
+    updateUnsavedChangesIndicator();
     showNotification('Calculator has been reset successfully.', 'success');
 }
 
@@ -1137,6 +1413,9 @@ function toggleDarkMode() {
     const icon = btn.querySelector('i');
     icon.className = state.ui.isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
     btn.setAttribute('aria-pressed', state.ui.isDarkMode);
+    
+    // Update message based on current mode
+    showNotification(`${state.ui.isDarkMode ? 'Dark' : 'Light'} mode activated`, 'info');
 }
 
 // ===== Update UI From State =====
@@ -1228,6 +1507,9 @@ function updateUIFromState() {
         if (icon) icon.className = state.ui.isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
         $('darkModeToggle').setAttribute('aria-pressed', state.ui.isDarkMode);
     }
+    
+    // Update unsaved changes indicator
+    updateUnsavedChangesIndicator();
 }
 
 /**
@@ -1244,7 +1526,7 @@ function updateUIForSubcontractor(isSubcontractor, internalCost, subcontractorCo
             .forEach(el => el.classList.add('text-crossed'));
         
         // Explain they are reference costs for final price calculation
-        const costsText = 'Costo de referencia usado para calcular el precio final';
+        const costsText = 'Reference cost used for final price calculation';
         setHTML('laborDetails', costsText);
         setHTML('laborTaxDetails', costsText);
         setHTML('workCompDetails', costsText);
@@ -1260,7 +1542,7 @@ function updateUIForSubcontractor(isSubcontractor, internalCost, subcontractorCo
         
         // Show clearer text about savings
         setDisplay('extraBenefitRow', true);
-        setHTML('extraBenefitDetails', 'Ahorro por usar subcontratista en lugar de equipo interno (diferencia entre costos internos y costo del subcontratista)');
+        setHTML('extraBenefitDetails', 'Savings from using subcontractor instead of internal team (difference between internal costs and subcontractor cost)');
         
         // Also show these savings in profit breakdown section
         setDisplay('subcontractorSavingRow', true);
@@ -1704,6 +1986,12 @@ function calculateAll() {
             }
             setHTML('markupDetails', markupDetailsText);
             
+            // Highlight key values that have changed
+            highlightElement('grandTotal');
+            highlightElement('finalCompanyProfit');
+            highlightElement('netProfit');
+            highlightElement('totalCostPercentage');
+            
             // Clear loading state
             setLoadingState(false);
         } catch (error) {
@@ -1725,10 +2013,80 @@ function preparePdfOrPrint(mode) {
     document.querySelector('.profit-section').setAttribute('data-print-date', new Date().toLocaleDateString());
     
     if (mode === 'print') {
-        window.print();
+        // Show print preview modal first
+        showPrintPreview();
     } else if (mode === 'pdf') {
         generatePDF();
     }
+}
+
+/**
+ * Show print preview modal
+ */
+function showPrintPreview() {
+    // Check if modal exists
+    let modal = $('printPreviewModal');
+    
+    // Create modal if it doesn't exist
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'printPreviewModal';
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <span class="close-modal" aria-label="Close preview">&times;</span>
+                <h2>Print Preview</h2>
+                <p>Your quote is ready to print.</p>
+                <div id="printPreviewContent"></div>
+                <div class="modal-actions">
+                    <button id="confirmPrintBtn" class="action-btn print-btn">
+                        <i class="fas fa-print" aria-hidden="true"></i> Print Quote
+                    </button>
+                    <button class="action-btn" id="cancelPrintBtn">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // Add event listeners for the new modal
+        modal.querySelector('.close-modal').addEventListener('click', () => {
+            modal.classList.remove('visible');
+            setTimeout(() => { modal.style.display = 'none'; }, 300);
+        });
+        
+        $('cancelPrintBtn').addEventListener('click', () => {
+            modal.classList.remove('visible');
+            setTimeout(() => { modal.style.display = 'none'; }, 300);
+        });
+        
+        $('confirmPrintBtn').addEventListener('click', () => {
+            modal.classList.remove('visible');
+            setTimeout(() => { 
+                modal.style.display = 'none';
+                window.print();
+            }, 300);
+        });
+    }
+    
+    // Clone summary content for preview
+    const previewContent = $('printPreviewContent');
+    previewContent.innerHTML = '';
+    
+    const contentClone = $('summaryContent').cloneNode(true);
+    
+    // Remove action buttons from clone
+    const actionButtons = contentClone.querySelector('.action-buttons');
+    if (actionButtons) {
+        actionButtons.remove();
+    }
+    
+    previewContent.appendChild(contentClone);
+    
+    // Show the modal
+    modal.style.display = 'block';
+    setTimeout(() => modal.classList.add('visible'), 10);
 }
 
 /**
@@ -1736,13 +2094,21 @@ function preparePdfOrPrint(mode) {
  */
 function generatePDF() {
     // Check if jsPDF is available
-     if (typeof window.jspdf !== 'undefined') {
+    const jsPdfAvailable = typeof window.jspdf !== 'undefined' || typeof jsPDF !== 'undefined';
+     
+    if (jsPdfAvailable) {
         // Generate PDF when jsPDF is loaded
         showNotification("Preparing PDF...", "info");
         
         try {
             // Create a clone of results section
             const quoteSummary = document.querySelector('#summaryContent').cloneNode(true);
+            
+            // Remove action buttons from the clone
+            const actionButtons = quoteSummary.querySelector('.action-buttons');
+            if (actionButtons) {
+                actionButtons.remove();
+            }
             
             // Style modifications for PDF
             const elements = quoteSummary.querySelectorAll('.result-section, .profit-section');
@@ -1752,43 +2118,101 @@ function generatePDF() {
                 el.style.border = '1px solid #ccc';
             });
             
+            // Create quote number
+            const quoteNumber = 'PFS-' + new Date().getFullYear() + '-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            
+            // Create and format current date
+            const currentDate = new Date();
+            const formattedDate = currentDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
             // Set up PDF document
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'pt', 'a4');
+            const doc = new jsPDF({
+                orientation: 'p',
+                unit: 'pt',
+                format: 'a4',
+                compress: true
+            });
+            
+            // Define colors
+            const brandBlue = '#03143A';
+            const brandRed = '#C70532';
             
             // Add logo and header
+            doc.setFillColor(brandBlue);
+            doc.rect(0, 0, doc.internal.pageSize.getWidth(), 80, 'F');
+            
+            doc.setTextColor(255);
             doc.setFontSize(22);
-            doc.setTextColor(3, 20, 58); // brand blue
-            doc.text('Prime Facility Services Group', 40, 40);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Prime Facility Services Group', 40, 35);
             
             doc.setFontSize(16);
-            doc.text('Kitchen Cleaning Quote', 40, 70);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Professional Kitchen Cleaning Quote', 40, 60);
+            
+            // Add quote details
+            doc.setTextColor(80);
+            doc.setFillColor(245, 245, 245);
+            doc.rect(0, 80, doc.internal.pageSize.getWidth(), 60, 'F');
             
             doc.setFontSize(12);
-            doc.setTextColor(100);
-            doc.text(`Date: ${new Date().toLocaleDateString()}`, 40, 90);
+            doc.text(`Quote #: ${quoteNumber}`, 40, 100);
+            doc.text(`Date: ${formattedDate}`, 40, 120);
+            doc.text(`Valid until: ${new Date(currentDate.setMonth(currentDate.getMonth() + 1)).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            })}`, 300, 100);
             
             // Use html2canvas to render the quote content
             html2canvas(quoteSummary, {
                 scale: 2,
                 useCORS: true,
-                logging: false
+                logging: false,
+                backgroundColor: 'white'
             }).then(canvas => {
                 // Add quote content
                 const imgData = canvas.toDataURL('image/png');
                 const imgWidth = 520;
                 const imgHeight = canvas.height * imgWidth / canvas.width;
                 
-                doc.addImage(imgData, 'PNG', 40, 110, imgWidth, imgHeight);
+                doc.addImage(imgData, 'PNG', 40, 160, imgWidth, imgHeight);
                 
-                // Add footer
-                const pageCount = doc.internal.getNumberOfPages();
-                doc.setFontSize(10);
-                doc.setTextColor(150);
-                doc.text('Generated by Prime Facility Services Group Kitchen Cleaning Calculator', 40, doc.internal.pageSize.height - 20);
+                // Add Terms & Conditions
+                const footerY = 160 + imgHeight + 40;
+                
+                if (footerY < doc.internal.pageSize.getHeight() - 100) {
+                    // Add terms and conditions
+                    doc.setFillColor(245, 245, 245);
+                    doc.rect(40, footerY, 520, 80, 'F');
+                    
+                    doc.setFontSize(10);
+                    doc.setTextColor(80);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Terms & Conditions:', 50, footerY + 20);
+                    
+                    doc.setFont('helvetica', 'normal');
+                    doc.text('This quote is valid for 30 days. Payment terms: 50% deposit, balance due upon completion.', 50, footerY + 40);
+                    doc.text('All services are subject to our standard terms and conditions available upon request.', 50, footerY + 55);
+                    doc.text('Please contact us with any questions or to schedule your service.', 50, footerY + 70);
+                }
+                
+                // Add contact information
+                doc.setDrawColor(200);
+                doc.line(40, doc.internal.pageSize.getHeight() - 50, doc.internal.pageSize.getWidth() - 40, doc.internal.pageSize.getHeight() - 50);
+                
+                doc.setFontSize(9);
+                doc.setTextColor(100);
+                doc.text('Prime Facility Services Group | Phone: (713) 555-7890 | Email: info@primefacilityservices.com', doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 30, { align: 'center' });
+                doc.text('www.primefacilityservicesgroup.com', doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 15, { align: 'center' });
                 
                 // Save the PDF
-                doc.save('kitchen-cleaning-quote.pdf');
+                doc.save(`kitchen-cleaning-quote-${quoteNumber}.pdf`);
                 
                 showNotification("PDF generated successfully!", "success");
             }).catch(err => {
@@ -1826,7 +2250,8 @@ function captureScreenshot() {
             scale: 2,
             useCORS: true,
             logging: false,
-            allowTaint: false
+            allowTaint: false,
+            backgroundColor: 'white'
         }).then(canvas => {
             // Show the modal
             const modal = document.getElementById('screenshotModal');
@@ -1840,11 +2265,19 @@ function captureScreenshot() {
             // Add the canvas to the modal
             canvas.style.width = '100%';
             canvas.style.height = 'auto';
+            canvas.style.borderRadius = '8px';
+            canvas.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
             container.appendChild(canvas);
             
             // Set up download link
             const downloadLink = document.getElementById('downloadLink');
+            
+            // Create quote number for filename
+            const quoteNumber = 'PFS-' + new Date().getFullYear() + '-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            
+            // Set download attributes
             downloadLink.href = canvas.toDataURL('image/png');
+            downloadLink.download = `kitchen-cleaning-quote-${quoteNumber}.png`;
             
             showNotification("Screenshot created successfully!", "success");
         }).catch(error => {
@@ -1867,8 +2300,95 @@ function addLoadingIndicator() {
     if (!document.querySelector('.loading-indicator')) {
         const loadingIndicator = document.createElement('div');
         loadingIndicator.className = 'loading-indicator';
+        loadingIndicator.setAttribute('role', 'progressbar');
+        loadingIndicator.setAttribute('aria-busy', 'true');
+        loadingIndicator.setAttribute('aria-label', 'Loading...');
         document.body.appendChild(loadingIndicator);
     }
+}
+
+/**
+ * Create undo/redo buttons if they don't exist
+ */
+function addUndoRedoButtons() {
+    // Check if buttons already exist
+    if ($('undoBtn')) return;
+    
+    // Find the tab navigation area
+    const tabNav = document.querySelector('.nav-tabs');
+    if (!tabNav) return;
+    
+    // Create undo button
+    const undoBtn = document.createElement('button');
+    undoBtn.id = 'undoBtn';
+    undoBtn.className = 'nav-tab nav-tab-action';
+    undoBtn.disabled = true;
+    undoBtn.setAttribute('aria-disabled', true);
+    undoBtn.setAttribute('aria-label', 'Undo last change');
+    undoBtn.innerHTML = '<i class="fas fa-undo"></i>';
+    undoBtn.addEventListener('click', undo);
+    
+    // Create redo button
+    const redoBtn = document.createElement('button');
+    redoBtn.id = 'redoBtn';
+    redoBtn.className = 'nav-tab nav-tab-action';
+    redoBtn.disabled = true; 
+    redoBtn.setAttribute('aria-disabled', true);
+    redoBtn.setAttribute('aria-label', 'Redo last change');
+    redoBtn.innerHTML = '<i class="fas fa-redo"></i>';
+    redoBtn.addEventListener('click', redo);
+    
+    // Add buttons before the dark mode toggle
+    tabNav.insertBefore(undoBtn, $('darkModeToggle'));
+    tabNav.insertBefore(redoBtn, $('darkModeToggle'));
+}
+
+/**
+ * Add or update accessibility attributes
+ */
+function enhanceAccessibility() {
+    // Add proper roles to main elements
+    const container = document.querySelector('.container');
+    if (container) container.setAttribute('role', 'application');
+    
+    // Add accessibility attributes to form elements
+    document.querySelectorAll('input, select').forEach(el => {
+        if (!el.hasAttribute('aria-label') && !el.getAttribute('id')) {
+            const label = el.closest('.input-field')?.querySelector('label');
+            if (label) {
+                el.setAttribute('aria-label', label.textContent);
+            }
+        }
+    });
+    
+    // Make expandable sections accessible
+    document.querySelectorAll('.toggle-section').forEach(btn => {
+        const targetId = btn.getAttribute('data-target');
+        const target = $(targetId);
+        
+        if (target && btn) {
+            btn.setAttribute('aria-expanded', !target.classList.contains('hidden-section'));
+            btn.setAttribute('aria-controls', targetId);
+            target.setAttribute('aria-hidden', target.classList.contains('hidden-section'));
+        }
+    });
+    
+    // Enhance options accessibility
+    document.querySelectorAll('.profit-option').forEach(option => {
+        option.setAttribute('role', 'option');
+        if (option.classList.contains('active')) {
+            option.setAttribute('aria-selected', 'true');
+        }
+        if (option.classList.contains('disabled')) {
+            option.setAttribute('aria-disabled', 'true');
+        }
+    });
+    
+    // Make tooltips accessible
+    document.querySelectorAll('.tooltip').forEach(tooltip => {
+        tooltip.setAttribute('role', 'tooltip');
+        tooltip.setAttribute('tabindex', '0');
+    });
 }
 
 /**
@@ -1878,29 +2398,46 @@ function initApp() {
     // Add loading indicator
     addLoadingIndicator();
     
+    // Add undo/redo buttons
+    addUndoRedoButtons();
+    
     // Initialize event listeners
     initEventListeners();
     
     // Initialize validation
     initValidation();
     
+    // Enhance accessibility
+    enhanceAccessibility();
+    
     // Update UI labels from config
     updateHoodPriceLabels();
+    
+    // Check dark mode preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        toggleDarkMode();
+    }
     
     // Perform initial calculation
     calculateAll();
     
     // Check for missing required libraries
-    if (typeof window.jspdf === 'undefined' && typeof jsPDF === 'undefined') {
-        console.warn('jsPDF library not loaded. PDF functionality will be limited.');
+    const support = checkBrowserSupport();
+    
+    if (!support.html2canvas || !support.jsPDF) {
+        console.warn('Some export libraries not loaded. PDF or screenshot functionality may be limited.');
     }
     
-    if (typeof html2canvas === 'undefined') {
-        console.warn('html2canvas library not loaded. Screenshot functionality will be limited.');
+    // Welcome notification for first-time users
+    if (support.localStorage) {
+        if (!localStorage.getItem('welcomeShown')) {
+            setTimeout(() => {
+                showNotification("Welcome to the Kitchen Cleaning Calculator! Enter your details and get an instant quote.", "info", 6000);
+                localStorage.setItem('welcomeShown', 'true');
+            }, 1000);
+        }
     }
 }
 
 // Initialize the app when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', initApp);
-
-
