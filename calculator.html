@@ -647,7 +647,7 @@
                                 <div class="result-row" id="extraBenefitRow" style="display:none;margin-top:15px;">
                                     <div class="label">Extra Benefits:</div>
                                     <div class="value text-highlight" id="extraBenefitValue">$0.00</div>
-                                    <div class="details extra-benefit">Ahorro por usar subcontratista en lugar de equipo interno</div>
+                                    <div class="details extra-benefit" id="extraBenefitDetails">Ahorro por usar subcontratista en lugar de equipo interno</div>
                                 </div>
                                 <h4 style="margin-top:15px;">Company Profit Breakdown</h4>
                                 <div class="profit-row" id="profitMarkupRow">
@@ -1377,7 +1377,7 @@ function showContent(contentId) {
 
 function resetCalculator() {
     if (!confirm('Are you sure you want to reset the calculator? All current data will be lost.')) return;
-    
+    //hola
     // Save UI state and config
     const uiSectionStates = state.ui.sectionStates;
     const savedConfig = { ...state.config };
