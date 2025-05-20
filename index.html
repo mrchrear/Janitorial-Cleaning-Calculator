@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prime Facility Services Group - Calculadora de Limpieza</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="calculator-header">
+            <div>
+                <h1 class="calculator-title">Kitchen Cleaning Calculatorrrrrrrr</h1>
+                <p class="calculator-subtitle">Optimize your professional kitchen cleaning quotes</p>
+            </div>
+            <div class="calculator-icon">
+                <img src="https://primefacilityservicesgroup.com/wp-content/uploads/2024/02/Logo-Prime-Facility-White-No-Background-1.png" alt="Prime Facility Services Group Logo" style="height:60px;width:auto;">
+            </div>
+        </div>
+        <div class="nav-tabs" role="tablist">
+            <a id="quotationTab" class="nav-tab active" role="tab" aria-selected="true" aria-controls="quotationContent"><i class="fas fa-home"></i> Quick Quote</a>
+            <a id="configTab" class="nav-tab" role="tab" aria-selected="false" aria-controls="configContent"><i class="fas fa-cog"></i> Configuration</a>
+            <a id="breakdownTab" class="nav-tab" role="tab" aria-selected="false" aria-controls="quotationContent"><i class="fas fa-receipt"></i> Breakdown</a>
+            <a id="resetBtn" class="nav-tab nav-tab-reset" role="button"><i class="fas fa-redo"></i> Reset</a>
+            <a id="darkModeToggle" class="nav-tab" role="button" aria-pressed="false"><i class="fas fa-moon"></i> Dark</a>
+        </div>
+        <div class="calculator-content" id="quotationContent" role="tabpanel" aria-labelledby="quotationTab">
+            <div class="top-row">
+                <div class="section-card" id="basicInputsSection" style="flex:1;">
+                    <div class="section-header">
+                        <i class="fas fa-users" aria-hidden="true"></i>
+                        <h3>Staff & Time</h3>
+                        <button class="toggle-section" data-target="basicInputsContent"><i class="fas fa-chevron-up"></i></button>
+                    </div>
+                    <div class="section-content" id="basicInputsContent">
+                        <div class="input-row">
+                            <div class="input-col">
+                                <div class="input-field">
+                                    <label for="workers">Workers</label>
+                                    <input type="number" id="workers" min="0" value="2" required>
+                                    <p class="error-message" id="workersError" role="alert">Min: 0 workers</p>
+                                </div>
+                            </div>
+                            <div class="input-col">
+                                <div class="input-field">
+                                    <label for="hours">Hours/Day</label>
+                                    <input type="number" id="hours" min="1" value="4" required>
+                                    <p class="error-message" id="hoursError" role="alert">Min: 1 hour</p>
+                                </div>
+                            </div>
+                            <div class="input-col">
+                                <div class="input-field">
+                                    <label for="days">Days</label>
+                                    <input type="number" id="days" min="1" value="1" required>
+                                    <p class="error-message" id="daysError" role="alert">Min: 1 day</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="compact-options-grid">
+                            <div class="input-field">
+                                <label for="materials">Materials ($/day)</label>
+                                <input type="number" id="materials" min="0" value="50" required>
+                                <p class="error-message" id="materialsError" role="alert">Please enter a valid amount</p>
+                            </div>
+                            <div class="input-field">
+                                <label for="equipment">Equipment ($/day)</label>
+                                <input type="number" id="equipment" min="0" value="40" required>
+                                <p class="error-message" id="equipmentError" role="alert">Please enter a valid amount</p>
+                            </div>
+                        </div>
+                        <div class="checkbox-field">
+                            <input type="checkbox" id="outsideHouston">
+                            <label for="outsideHouston"><strong>Outside Houston</strong> <span class="location-alert">(Different transport cost)</span></label>
+                        </div>
+                        <div class="checkbox-field">
+                            <input type="checkbox" id="isHoliday">
+                            <label for="isHoliday">Holiday Service (+25%)</label>
+                        </div>
+                        <div class="options-divider">
+                            <div class="checkbox-field">
+                                <input type="checkbox" id="useSubcontractor">
+                                <label for="useSubcontractor"><strong>Use Subcontractor</strong> (Calculate profit when outsourcing the service)</label>
+                            </div>
+                            <div id="subcontractorDetails" class="subcontract-details">
+                                <div class="input-field">
+                                    <label for="subcontractorCost">Subcontractor Cost ($)</label>
+                                    <input type="number" id="subcontractorCost" min="0" value="0" required>
+                                    <p class="error-message" id="subcontractorCostError" role="alert">Please enter a valid cost amount</p>
+                                    <div class="help-text">Total amount charged by the subcontractor for this service</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="insurance-costs">
+                            <div class="insurance-title">
+                                <i class="fas fa-shield-alt" aria-hidden="true"></i> Insurance Costs
+                            </div>
+                            <div class="insurance-info">
+                                These mandatory insurance costs are automatically calculated and included in the grand total.
+                            </div>
+                            <div class="checkbox-field">
+                                <input type="checkbox" id="includeInsurance" checked>
+                                <label for="includeInsurance"><strong>Include Insurance Costs</strong></label>
+                            </div>
+                        </div>
+                        <div class="advanced-options">
+                            <div class="advanced-options-title" id="advancedOptionsToggle">
+                                <span><i class="fas fa-sliders-h"></i> Advanced Options</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="advanced-options-content" id="advancedOptionsContent">
+                                <div class="profit-optimization-panel">
+                                    <div class="profit-optimization-title">
+                                        Profit & Pricing Strategy
+                                    </div>
+                                    <div class="profit-options">
+                                        <div class="profit-option" id="optimizeCostOption">
+                                            <div class="profit-option-content">
+                                                <div class="profit-option-title">Optimize Costs to 62%</div>
+                                                <div class="profit-option-desc">Automatically adjusts markup to maintain ideal cost ratio</div>
+                                            </div>
+                                            <div class="profit-option-control">
+                                                <label class="toggle-switch">
+                                                    <input type="checkbox" id="enableAutoCostOptimization">
+                                                    <span class="toggle-slider"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="profit-option" id="customMarkupOption">
+                                            <div class="profit-option-content">
+                                                <div class="profit-option-title">Custom Markup Percentage</div>
+                                                <div class="profit-option-desc">Manually set your desired markup percentage</div>
+                                            </div>
+                                            <div class="profit-option-control">
+                                                <label class="toggle-switch">
+                                                    <input type="checkbox" id="useCustomMarkup">
+                                                    <span class="toggle-slider"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div id="markupSliderContainer" style="display:none;margin:5px 0 5px 30px;">
+                                            <div class="slider-wrapper">
+                                                <input type="range" min="20" max="500" value="120" class="slider" id="markupSlider">
+                                                <input type="number" min="20" value="120" class="slider-value" id="markupInput">
+                                            </div>
+                                            <div class="slider-hint">
+                                                <span>Low</span>
+                                                <span>High</span>
+                                            </div>
+                                        </div>
+                                        <div class="profit-option" id="residualOption">
+                                            <div class="profit-option-content">
+                                                <div class="profit-option-title">Residual Percentage</div>
+                                                <div class="profit-option-desc">Add percentage to subtotal before markup is applied</div>
+                                            </div>
+                                            <div class="profit-option-control">
+                                                <label class="toggle-switch">
+                                                    <input type="checkbox" id="enableResidualPercentage">
+                                                    <span class="toggle-slider"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div id="residualPercentageContainer" style="display:none;margin:5px 0 5px 30px;">
+                                            <div class="percentage-option">
+                                                <label for="residualPercentageValue">Residual percentage value</label>
+                                                <input type="number" id="residualPercentageValue" min="0" max="100" step="0.1" value="10">
+                                            </div>
+                                        </div>
+                                        <div class="profit-option">
+                                            <div class="profit-option-content">
+                                                <div class="profit-option-title">Sales Commission</div>
+                                                <div class="profit-option-desc">Percentage of net profit for sales commission</div>
+                                            </div>
+                                            <div class="profit-option-control">
+                                                <input type="number" id="commissionPercentage" min="0" max="100" step="0.1" value="20">
+                                            </div>
+                                        </div>
+                                        <div class="profit-option" id="splitCommissionOption">
+                                            <div class="profit-option-content">
+                                                <div class="profit-option-title">Split Commission</div>
+                                                <div class="profit-option-desc">Divide commission between multiple people</div>
+                                            </div>
+                                            <div class="profit-option-control">
+                                                <label class="toggle-switch">
+                                                    <input type="checkbox" id="enableCommissionSplit">
+                                                    <span class="toggle-slider"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div id="splitCommissionContainer" style="display:none;margin:5px 0 5px 30px;">
+                                            <div class="option-title" style="font-size:13px;margin-bottom:10px;">Commission Split Percentages</div>
+                                            <div id="commissionSplitsWrapper">
+                                                <div class="percentage-option" style="margin-bottom:8px;">
+                                                    <label for="commissionSplit1">Commission 1</label>
+                                                    <input type="number" id="commissionSplit1" min="0" max="100" step="0.1" value="10" class="commission-split-input">
+                                                </div>
+                                                <div class="percentage-option" style="margin-bottom:8px;">
+                                                    <label for="commissionSplit2">Commission 2</label>
+                                                    <input type="number" id="commissionSplit2" min="0" max="100" step="0.1" value="10" class="commission-split-input">
+                                                </div>
+                                            </div>
+                                            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+                                                <button id="addCommissionSplitBtn" style="background-color:var(--brand-blue);color:white;border:none;border-radius:4px;padding:5px 10px;font-size:12px;cursor:pointer;">
+                                                    <i class="fas fa-plus" style="margin-right:5px;"></i> Add More
+                                                </button>
+                                                <div style="font-size:13px;font-weight:500;">
+                                                    Total: <span id="totalCommissionSplit">20%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="option-group">
+                                    <div class="option-title">Cost Components</div>
+                                    <div class="compact-options-grid">
+                                        <div class="toggle-option">
+                                            <label for="includeTransport">Include Transportation</label>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="includeTransport" checked>
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                        <div class="toggle-option">
+                                            <label for="includeMaterials">Include Materials</label>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="includeMaterials" checked>
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                        <div class="toggle-option">
+                                            <label for="includeEquipment">Include Equipment</label>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="includeEquipment" checked>
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                        <div class="toggle-option">
+                                            <label for="enableRounding">Enable Rounding</label>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="enableRounding" checked>
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="option-group">
+                                    <div class="option-title">Operational Percentages</div>
+                                    <div class="compact-options-grid">
+                                        <div class="percentage-option">
+                                            <label for="regularSuppliesPercentage">Regular Supplies</label>
+                                            <input type="number" id="regularSuppliesPercentage" min="0" max="100" step="0.1" value="6">
+                                        </div>
+                                        <div class="percentage-option">
+                                            <label for="additionalEquipmentPercentage">Additional Equipment</label>
+                                            <input type="number" id="additionalEquipmentPercentage" min="0" max="100" step="0.1" value="2.75">
+                                        </div>
+                                        <div class="percentage-option">
+                                            <label for="uniformSafetyPercentage">Uniform/Safety/Misc</label>
+                                            <input type="number" id="uniformSafetyPercentage" min="0" max="100" step="0.1" value="2.5">
+                                        </div>
+                                        <div class="percentage-option">
+                                            <label for="communicationsPercentage">Communications</label>
+                                            <input type="number" id="communicationsPercentage" min="0" max="100" step="0.1" value="1">
+                                        </div>
+                                        <div class="percentage-option">
+                                            <label for="overheadPercentage">Overhead</label>
+                                            <input type="number" id="overheadPercentage" min="0" max="100" step="0.1" value="5">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="option-group">
+                                    <div class="option-title">Initial Fee</div>
+                                    <div class="toggle-option">
+                                        <label for="enableInitialFee">Add initial fee charge</label>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="enableInitialFee">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div id="initialFeeContainer" style="display:none;margin-top:10px;">
+                                        <div class="input-field">
+                                            <label for="initialFeeValue">Initial Fee Amount ($)</label>
+                                            <input type="number" id="initialFeeValue" min="0" value="150">
+                                        </div>
+                                        <div class="help-text">One-time fee added at the beginning of the contract</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-card" id="kitchenSection" style="flex:1;">
+                    <div class="section-header">
+                        <i class="fas fa-utensils" aria-hidden="true"></i>
+                        <h3>Kitchen Details</h3>
+                        <button class="toggle-section" data-target="kitchenContent"><i class="fas fa-chevron-up"></i></button>
+                    </div>
+                    <div class="section-content" id="kitchenContent">
+                        <div class="form-group-title">Hood Cleaning</div>
+                        <div class="input-row">
+                            <div class="input-col">
+                                <div class="input-field">
+                                    <label for="largeHoods">Large Hoods</label>
+                                    <input type="number" id="largeHoods" min="0" value="0" required>
+                                    <p class="error-message" id="largeHoodsError" role="alert">Please enter a valid number</p>
+                                    <div class="help-text" id="largeHoodPrice">$650 each</div>
+                                </div>
+                            </div>
+                            <div class="input-col">
+                                <div class="input-field">
+                                    <label for="smallHoods">Small Hoods</label>
+                                    <input type="number" id="smallHoods" min="0" value="0" required>
+                                    <p class="error-message" id="smallHoodsError" role="alert">Please enter a valid number</p>
+                                    <div class="help-text" id="smallHoodPrice">$550 each</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-field">
+                            <label for="hoodFrequency">Cleaning Frequency</label>
+                            <input type="number" id="hoodFrequency" min="1" value="1" required>
+                            <p class="error-message" id="hoodFrequencyError" role="alert">Min: 1 cleaning</p>
+                            <div class="help-text">Number of times during contract</div>
+                        </div>
+                        <div class="form-group-title" style="margin-top:15px;">Hood Costs Breakdown</div>
+                        <div class="input-row">
+                            <div class="input-col">
+                                <div class="input-field">
+                                    <label for="hoodLaborCostPerc">Labor Cost Percentage</label>
+                                    <input type="number" id="hoodLaborCostPerc" min="0" max="100" value="38" required>
+                                    <div class="help-text">Percentage of hood price that represents labor costs</div>
+                                </div>
+                            </div>
+                            <div class="input-col">
+                                <div class="input-field">
+                                    <label for="hoodMaterialCostPerc">Material Cost Percentage</label>
+                                    <input type="number" id="hoodMaterialCostPerc" min="0" max="100" value="12" required>
+                                    <div class="help-text">Percentage of hood price that represents material costs</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="section-card">
+                <div class="section-header">
+                    <i class="fas fa-file-invoice-dollar" aria-hidden="true"></i>
+                    <h3>Quote Summary</h3>
+                    <button class="toggle-section" data-target="summaryContent"><i class="fas fa-chevron-up"></i></button>
+                </div>
+                <div class="section-content" id="summaryContent">
+                    <div style="display:flex;gap:20px;">
+                        <div style="flex:1;">
+                            <div class="result-section">
+                                <div class="result-row" id="laborRow">
+                                    <div class="label">Labor Cost:</div>
+                                    <div class="value" id="laborCost">$0.00</div>
+                                    <div class="details" id="laborDetails"></div>
+                                </div>
+                                <div class="result-row" id="laborTaxRow">
+                                    <div class="label">Labor Taxes (17%):</div>
+                                    <div class="value" id="laborTax">$0.00</div>
+                                    <div class="details" id="laborTaxDetails">Employment taxes and benefits</div>
+                                </div>
+                                <div class="result-row" id="workCompRow">
+                                    <div class="label">Worker's Compensation:</div>
+                                    <div class="value" id="workCompCost">$0.00</div>
+                                    <div class="details" id="workCompDetails">$1.88 per $100 of labor cost</div>
+                                </div>
+                                <div class="result-row" id="transportRow">
+                                    <div class="label">Transport Cost:</div>
+                                    <div class="value" id="transportCost">$0.00</div>
+                                    <div class="details" id="transportDetails"></div>
+                                </div>
+                                <div class="result-row" id="materialsRow">
+                                    <div class="label">Materials:</div>
+                                    <div class="value" id="materialsCost">$0.00</div>
+                                    <div class="details" id="materialsDetails"></div>
+                                </div>
+                                <div class="result-row" id="equipmentRow">
+                                    <div class="label">Equipment:</div>
+                                    <div class="value" id="equipmentCost">$0.00</div>
+                                    <div class="details" id="equipmentDetails"></div>
+                                </div>
+                                <div class="result-row" id="hoodCleaningRow">
+                                    <div class="label">Hood Cleaning:</div>
+                                    <div class="value" id="hoodCleaningCost">$0.00</div>
+                                    <div class="details" id="hoodCleaningDetails"></div>
+                                </div>
+                                <div class="result-row" id="subcontractorRow" style="display:none;">
+                                    <div class="label">Subcontractor Cost:</div>
+                                    <div class="value" id="subcontractorCostDisplay">$0.00</div>
+                                    <div class="details">Amount paid to the subcontractor for this service</div>
+                                </div>
+                                <div class="result-row expandable" id="operationalCostsRow">
+                                    <div class="label">Operational Costs <i class="fas fa-chevron-down" style="font-size:12px;margin-left:5px;cursor:pointer;"></i></div>
+                                    <div class="value" id="operationalCostsValue">$0.00</div>
+                                    <div class="details" id="operationalCostsDetails" style="display:none;">
+                                        <div class="cost-detail-row" id="regularSuppliesRow" style="display:flex;justify-content:space-between;margin:5px 0;padding-left:15px;">
+                                            <div>Regular Supplies (<span id="regularSuppliesPercDisplay">6</span>%)</div>
+                                            <div id="regularSuppliesValue">$0.00</div>
+                                        </div>
+                                        <div class="cost-detail-row" id="additionalEquipmentRow" style="display:flex;justify-content:space-between;margin:5px 0;padding-left:15px;">
+                                            <div>Equipment (<span id="additionalEquipmentPercDisplay">2.75</span>%)</div>
+                                            <div id="additionalEquipmentValue">$0.00</div>
+                                        </div>
+                                        <div class="cost-detail-row" id="uniformSafetyRow" style="display:flex;justify-content:space-between;margin:5px 0;padding-left:15px;">
+                                            <div>Uniform/Safety/Misc (<span id="uniformSafetyPercDisplay">2.5</span>%)</div>
+                                            <div id="uniformSafetyValue">$0.00</div>
+                                        </div>
+                                        <div class="cost-detail-row" style="display:flex;justify-content:space-between;margin:5px 0;padding-left:15px;">
+                                            <div>Communications (<span id="communicationsPercDisplay">1</span>%)</div>
+                                            <div id="communicationsValue">$0.00</div>
+                                        </div>
+                                        <div class="cost-detail-row" style="display:flex;justify-content:space-between;margin:5px 0;padding-left:15px;">
+                                            <div>Overhead (<span id="overheadPercDisplay">5</span>%)</div>
+                                            <div id="overheadValue">$0.00</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="result-row">
+                                    <div class="label">Subtotal:</div>
+                                    <div class="value" id="subtotal">$0.00</div>
+                                </div>
+                                <div class="result-row" id="residualPercentageRow" style="display:none;">
+                                    <div class="label">Residual (<span id="residualPercentageDisplay">10</span>%):</div>
+                                    <div class="value" id="residualPercentageAmount">$0.00</div>
+                                    <div class="details">Residual percentage added to subtotal</div>
+                                </div>
+                                <div class="result-row" id="markupRow">
+                                    <div class="label">Service Markup (<span id="markupPercentage">0</span>%): 
+                                        <span class="optimization-badge" id="optimizationBadge" style="display:none;">Optimized</span>
+                                    </div>
+                                    <div class="value" id="markup">$0.00</div>
+                                    <div class="details" id="markupDetails"></div>
+                                </div>
+                                <div class="result-row" id="holidayRow" style="display:none;">
+                                    <div class="label">Holiday Surcharge (25%):</div>
+                                    <div class="value" id="holidaySurcharge">$0.00</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="flex:1;">
+                            <div class="result-section">
+                                <div class="result-total">
+                                    <div class="label">TOTAL PRICE:</div>
+                                    <div class="value" id="totalPrice">$0.00</div>
+                                </div>
+                                <div class="result-row" id="generalLiabilityRow">
+                                    <div class="label">General Liability Insurance:</div>
+                                    <div class="value" id="generalLiabilityCost">$0.00</div>
+                                    <div class="details" id="generalLiabilityDetails">$7.33 per $1,000 of total price</div>
+                                </div>
+                                <div class="result-row" id="initialFeeRow" style="display:none;">
+                                    <div class="label">Initial Fee:</div>
+                                    <div class="value" id="initialFeeAmount">$0.00</div>
+                                    <div class="details">One-time initial fee for service setup</div>
+                                </div>
+                                <div class="result-row" id="roundingRow">
+                                    <div class="label">Rounding Adjustment:</div>
+                                    <div class="value" id="roundingAdjustment">$0.00</div>
+                                    <div class="details" id="roundingDetails">Rounding Grand Total up to the next $50</div>
+                                </div>
+                                <div class="result-total" id="grandTotalRow">
+                                    <div class="label">GRAND TOTAL:</div>
+                                    <div class="value" id="grandTotal">$0.00</div>
+                                </div>
+                                <div class="total-cost-percentage">
+                                    <h5>Total Cost Percentage 
+                                        <span id="targetAchievedBadge" class="target-achieved" style="display:none;">
+                                            <i class="fas fa-bullseye"></i> Target 62%
+                                        </span>
+                                        <span class="tooltip"><i class="fas fa-info-circle" aria-hidden="true"></i>
+                                            <span class="tooltip-text">This shows what portion of the total price is consumed by all costs combined. Industry standard is below 65%.</span>
+                                        </span>
+                                    </h5>
+                                    <div class="percentage-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                        <div class="percentage-fill" id="costPercentageFill"></div>
+                                        <div class="percentage-text-overlay" id="percentageTextOverlay">0%</div>
+                                    </div>
+                                    <div class="percentage-text">
+                                        <span>Costs: <span id="totalCostPercentage">0%</span></span>
+                                        <span>Profit: <span id="totalProfitPercentage">0%</span></span>
+                                    </div>
+                                </div>
+                                <div class="result-row" id="extraBenefitRow" style="display:none;margin-top:15px;">
+                                    <div class="label">Extra Benefits:</div>
+                                    <div class="value text-highlight" id="extraBenefitValue">$0.00</div>
+                                    <div class="details extra-benefit" id="extraBenefitDetails">Ahorro por usar subcontratista en lugar de equipo interno</div>
+                                </div>
+                                <h4 style="margin-top:15px;">Company Profit Breakdown</h4>
+                                <div class="profit-row" id="profitMarkupRow">
+                                    <div class="label">Service Markup (<span id="profitMarkupPercentage">0</span>%):</div>
+                                    <div class="value" id="profitMarkup">$0.00</div>
+                                </div>
+                                <div class="profit-row" id="subcontractorSavingRow" style="display:none;">
+                                    <div class="label">Subcontractor Savings:</div>
+                                    <div class="value" id="subcontractorSaving">$0.00</div>
+                                </div>
+                                <div class="profit-row">
+                                    <div class="label">Net Profit:</div>
+                                    <div class="value" id="netProfit">$0.00</div>
+                                </div>
+                                <div class="profit-row" id="salesCommissionRow">
+                                    <div class="label">Sales Commission (<span id="commissionPercentageDisplay">20</span>% of net profit):</div>
+                                    <div class="value" id="salesCommission">$0.00</div>
+                                </div>
+                                <div id="splitCommissionRows" style="display:none;">
+                                    <div id="splitCommissionRowsContent">
+                                        <div class="profit-row commission-split-row" data-index="1">
+                                            <div class="label">Commission 1 (<span class="commission-split-display">10</span>%):</div>
+                                            <div class="value commission-split-value">$0.00</div>
+                                        </div>
+                                        <div class="profit-row commission-split-row" data-index="2">
+                                            <div class="label">Commission 2 (<span class="commission-split-display">10</span>%):</div>
+                                            <div class="value commission-split-value">$0.00</div>
+                                        </div>
+                                    </div>
+                                    <div class="profit-row" style="border-top:1px dashed #ccc;margin-top:5px;padding-top:5px;">
+                                        <div class="label">Total Commission (<span id="totalCommissionSplitDisplay">20</span>%):</div>
+                                        <div class="value" id="totalSplitCommission">$0.00</div>
+                                    </div>
+                                </div>
+                                <div class="profit-row total">
+                                    <div class="label">Final Company Profit:</div>
+                                    <div class="value" id="finalCompanyProfit">$0.00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="action-buttons" style="margin-top:15px;">
+                        <button id="printQuoteBtn" class="action-btn print-btn">
+                            <i class="fas fa-print" aria-hidden="true"></i> Print Quote
+                        </button>
+                        <button id="downloadPdfBtn" class="action-btn pdf-btn">
+                            <i class="fas fa-file-pdf" aria-hidden="true"></i> Download PDF
+                        </button>
+                        <button id="screenshotBtn" class="action-btn screenshot-btn">
+                            <i class="fas fa-camera" aria-hidden="true"></i> Capture Quote
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="calculator-content" id="configContent" style="display:none;" role="tabpanel" aria-labelledby="configTab">
+            <div class="section-card">
+                <div class="section-header">
+                    <i class="fas fa-cog" aria-hidden="true"></i>
+                    <h3>System Configuration</h3>
+                </div>
+                <div class="section-content">
+                    <div class="input-row">
+                        <div class="input-col">
+                            <div class="input-field">
+                                <label for="regularPayRate">Regular Worker Pay Rate ($/hr)</label>
+                                <input type="number" id="regularPayRate" min="1" value="16" required>
+                                <p class="error-message" id="regularPayRateError" role="alert">Min: $1/hr</p>
+                            </div>
+                        </div>
+                        <div class="input-col">
+                            <div class="input-field">
+                                <label for="supervisorPayRate">Supervisor Pay Rate ($/hr)</label>
+                                <input type="number" id="supervisorPayRate" min="1" value="18" required>
+                                <p class="error-message" id="supervisorPayRateError" role="alert">Min: $1/hr</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="option-group">
+                        <div class="option-title">Transportation Costs</div>
+                        <div class="input-row">
+                            <div class="input-col">
+                                <div class="input-field">
+                                    <label for="transportCostConfig">Houston Transport Cost ($/day)</label>
+                                    <input type="number" id="transportCostConfig" min="0" value="150" required>
+                                    <p class="error-message" id="transportCostConfigError" role="alert">Please enter a valid amount</p>
+                                </div>
+                            </div>
+                            <div class="input-col">
+                                <div class="input-field">
+                                    <label for="outsideHoustonTransportConfig">Outside Houston Transport ($/day)</label>
+                                    <input type="number" id="outsideHoustonTransportConfig" min="0" value="300" required>
+                                    <p class="error-message" id="outsideHoustonTransportConfigError" role="alert">Please enter a valid amount</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="option-group">
+                        <div class="option-title">Insurance Rates</div>
+                        <div class="input-row">
+                            <div class="input-col">
+                                <div class="input-field">
+                                    <label for="workCompRate">Worker's Comp Rate (per $100 labor)</label>
+                                    <input type="number" id="workCompRate" min="0" step="0.01" value="1.88" required>
+                                    <p class="error-message" id="workCompRateError" role="alert">Please enter a valid amount</p>
+                                </div>
+                            </div>
+                            <div class="input-col">
+                                <div class="input-field">
+                                    <label for="glRate">General Liability Rate (per $1,000 total)</label>
+                                    <input type="number" id="glRate" min="0" step="0.01" value="7.33" required>
+                                    <p class="error-message" id="glRateError" role="alert">Please enter a valid amount</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="option-group">
+                        <div class="option-title">Hood Prices Configuration</div>
+                        <div class="input-row">
+                            <div class="input-col">
+                                <div class="input-field">
+                                    <label for="largeHoodPrice">Large Hood Price ($)</label>
+                                    <input type="number" id="largeHoodPriceConfig" min="1" value="650" required>
+                                    <p class="error-message" id="largeHoodPriceError" role="alert">Min: $1</p>
+                                </div>
+                            </div>
+                            <div class="input-col">
+                                <div class="input-field">
+                                    <label for="smallHoodPrice">Small Hood Price ($)</label>
+                                    <input type="number" id="smallHoodPriceConfig" min="1" value="550" required>
+                                    <p class="error-message" id="smallHoodPriceError" role="alert">Min: $1</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="saveConfigBtn" style="margin-top:20px;">Save Configuration</button>
+                </div>
+            </div>
+        </div>
+        <div id="screenshotModal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2>Quote Screenshot</h2>
+                <p>Right-click on the image below and select "Save image as..." to download</p>
+                <div id="screenshotContainer"></div>
+                <a href="#" id="downloadLink" class="download-link" download="kitchen-quote.png">Download Image</a>
+            </div>
+        </div>
+        <div class="calculator-footer">
+            Professional Kitchen Cleaning Calculator v2.3<br>
+            Optimize your quotes and maximize the profitability of kitchen cleaning services.<br>
+            Designed and developed by <strong>Christian Reyes</strong> for <strong>Prime Facility Services Group</strong>.
+        </div>
+    </div>
+
+    <!-- Required libraries for PDF export and screenshots -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
