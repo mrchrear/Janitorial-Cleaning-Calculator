@@ -1736,8 +1736,8 @@ function preparePdfOrPrint(mode) {
  */
 function generatePDF() {
     // Check if jsPDF is available
-    if (typeof window.jspdf === 'undefined') {
-        // Load jsPDF if not available
+     if (typeof window.jspdf !== 'undefined') {
+        // Generate PDF when jsPDF is loaded
         showNotification("Preparing PDF...", "info");
         
         try {
