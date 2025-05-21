@@ -90,8 +90,66 @@ main {
 }
 
 .calculator-title {
-    font-size: 24px; 
+    font-size: 24px;
     font-weight: bold;
+}
+
+/* Calculator Switcher */
+.calculator-switcher {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.switch-btn {
+    padding: 8px 16px;
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--brand-blue);
+    background-color: var(--brand-blue);
+    color: var(--text-light);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.switch-btn.active,
+.switch-btn:hover {
+    background-color: var(--brand-red);
+    color: var(--text-light);
+}
+
+.calculator-panel[hidden] {
+    display: none;
+}
+
+body.dark-mode .switch-btn {
+    background-color: var(--bg-dark-card);
+    border-color: var(--light-blue);
+    color: var(--text-light);
+}
+
+body.dark-mode .switch-btn.active,
+body.dark-mode .switch-btn:hover {
+    background-color: var(--brand-red);
+}
+
+/* Timesheet Table */
+.timesheet-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.timesheet-table th,
+.timesheet-table td {
+    border: 1px solid var(--border-color);
+    padding: 6px;
+    text-align: center;
+}
+
+body.dark-mode .timesheet-table th,
+body.dark-mode .timesheet-table td {
+    border-color: #444;
 }
 
 .calculator-subtitle {
