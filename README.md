@@ -1,6 +1,6 @@
 # Janitorial Cleaning Calculator
 
-This project is a single-page web application for generating professional kitchen cleaning quotes. All logic lives in `app.js` while the UI is built from `index.html` and `styles.css`.
+This project is a single-page web application for generating professional kitchen cleaning quotes. The logic is split into modules under the `js` folder. A shared `global-state.js` exposes configuration and user preferences that are used by individual calculators.
 
 ## Opening the Application
 
@@ -16,3 +16,4 @@ The application loads **html2canvas** and **jsPDF** from CDN links (see the bott
 - **Breakdown** section showing a detailed profit analysis.
 - Options to print the quote, download it as a PDF or capture an image of the results.
 - Built-in dark mode toggle and advanced profit optimization options.
+- Ability to switch between the kitchen calculator and a placeholder timesheet calculator while keeping preferences such as dark mode.

@@ -29,17 +29,8 @@ const state = {
     outsideHouston: false,
     includeInsurance: true,
     
-    // Configuration
-    config: {
-        regularPayRate: 16,
-        supervisorPayRate: 18,
-        transportCostPerDay: 150,
-        outsideHoustonTransportCostPerDay: 300,
-        largeHoodPrice: 650,
-        smallHoodPrice: 550,
-        workCompRate: 1.88,
-        glRate: 7.33
-    },
+    // Configuration shared across calculators
+    config: GlobalState.config,
     
     // Options
     options: {
@@ -1333,7 +1324,7 @@ function resetCalculator() {
     // Save UI state and config
     const uiSectionStates = state.ui.sectionStates;
     const isDarkMode = state.ui.isDarkMode;
-    const savedConfig = { ...state.config };
+    const savedConfig = GlobalState.config;
     
     // Reset state to defaults but keep saved config
     Object.assign(state, {
@@ -1406,8 +1397,10 @@ function resetCalculator() {
  * Toggle dark mode styles
  */
 function toggleDarkMode() {
-    document.body.classList.toggle('dark-mode');
-    state.ui.isDarkMode = document.body.classList.contains('dark-mode');
+    GlobalState.preferences.darkMode = !GlobalState.preferences.darkMode;
+    document.body.classList.toggle('dark-mode', GlobalState.preferences.darkMode);
+    state.ui.isDarkMode = GlobalState.preferences.darkMode;
+    savePreferences();
     
     const btn = $('darkModeToggle');
     const icon = btn.querySelector('i');
@@ -2413,10 +2406,8 @@ function initApp() {
     // Update UI labels from config
     updateHoodPriceLabels();
     
-    // Check dark mode preference
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        toggleDarkMode();
-    }
+    // Apply stored preference for dark mode
+    document.body.classList.toggle('dark-mode', GlobalState.preferences.darkMode);
     
     // Perform initial calculation
     calculateAll();

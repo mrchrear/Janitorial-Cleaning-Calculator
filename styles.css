@@ -40,6 +40,17 @@
     --border-radius-lg: 12px;
 }
 
+.calculator-container {
+    transition: opacity 0.3s ease;
+}
+
+.hidden-calculator {
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    overflow: hidden;
+}
+
 /* Base & Reset Styles */
 * {
     box-sizing: border-box; 

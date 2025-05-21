@@ -11,8 +11,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <div class="container" role="application" aria-label="Kitchen Cleaning Calculator">
+<body onload="loadPreferences()">
+    <div id="kitchenCalculator" class="container calculator-container" role="application" aria-label="Kitchen Cleaning Calculator">
         <div class="calculator-header">
             <div>
                 <h1 class="calculator-title">Kitchen Cleaning Calculator</h1>
@@ -699,9 +699,16 @@
         </footer>
     </div>
 
+    <div id="timesheetCalculator" class="container calculator-container hidden-calculator" aria-label="Timesheet Calculator">
+        <h1>Timesheet Calculator</h1>
+        <p>Coming soon...</p>
+    </div>
+
     <!-- Required libraries for PDF export and screenshots -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="app.js"></script>
+    <script src="js/global-state.js"></script>
+    <script src="js/kitchen.js"></script>
+    <script src="js/timesheet.js"></script>
 </body>
 </html>
