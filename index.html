@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light only">
+    <meta name="description"
+        content="Professional business calculators for Prime Facility Services Group - Kitchen Cleaning and Timesheet Management">
+    <title>Business Calculators - Prime Facility Services Group</title>
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --brand-blue: #03143A;
+            --brand-red: #C70532;
+            --light-blue: #EBF2FA;
+            --border-color: #e0e0e0;
+            --success-green: #27ae60;
+            --text-primary: #333333 !important;
+            --text-secondary: #666666 !important;
+            --text-light: #ffffff;
+            --bg-primary: #ffffff !important;
+            --bg-secondary: #f8f9fa !important;
+            --bg-card: #ffffff !important;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.16);
+            --transition-default: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            background-color: #ffffff !important;
+            color-scheme: light only !important;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #ffffff !important;
+            background: #ffffff !important;
+            color: #333333 !important;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            background-color: #ffffff !important;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 60px 0 40px;
+            animation: fadeInDown 0.8s ease;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--brand-blue) 0%, var(--brand-red) 100%);
+            border-radius: 2px;
+        }
+
+        .logo {
+            height: 80px;
+            margin-bottom: 20px;
+            filter: brightness(0) saturate(100%) invert(8%) sepia(84%) saturate(2037%) hue-rotate(218deg) brightness(95%) contrast(103%);
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--brand-blue);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        /* Calculator Grid */
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        /* Calculator Card */
+        .calculator-card {
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .calculator-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+            border-color: transparent;
+        }
+
+        .calculator-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--brand-blue) 0%, var(--brand-red) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .calculator-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-header {
+            padding: 40px 30px;
+            background: linear-gradient(135deg, var(--brand-blue) 0%, #051d4a 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            transform: rotate(45deg);
+        }
+
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-subtitle {
+            font-size: 15px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+            font-weight: 300;
+        }
+
+        .card-body {
+            padding: 35px 30px;
+            background: #f8f9fa !important;
+            background-color: #f8f9fa !important;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .feature-list li {
+            padding: 12px 0;
+            display: flex;
+            align-items: flex-start;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list i {
+            color: var(--success-green);
+            margin-right: 12px;
+            margin-top: 3px;
+            font-size: 14px;
+        }
+
+        .feature-list span {
+            color: var(--text-primary);
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .launch-btn {
+            display: block;
+            width: 100%;
+            padding: 16px 30px;
+            background: linear-gradient(135deg, var(--brand-red) 0%, #a50329 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            font-size: 16px;
+        }
+
+        .launch-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .launch-btn:hover::before {
+            left: 100%;
+        }
+
+        .launch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(199, 5, 50, 0.25);
+        }
+
+        /* Features Section */
+        .features-section {
+            margin-top: 100px;
+            text-align: center;
+            animation: fadeIn 1s ease;
+            padding: 40px 0;
+            background: #f8f9fa !important;
+            background-color: #f8f9fa !important;
+            border-radius: 20px;
+        }
+
+        .features-title {
+            font-size: 32px;
+            color: var(--brand-blue);
+            margin-bottom: 50px;
+            font-weight: 600;
+            position: relative;
+            display: inline-block;
+        }
+
+        .features-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--brand-red);
+            border-radius: 2px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            padding: 0 20px;
+        }
+
+        .feature-item {
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            padding: 35px 25px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .feature-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--light-blue);
+        }
+
+        .feature-icon {
+            font-size: 40px;
+            color: var(--brand-blue);
+            margin-bottom: 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feature-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .feature-desc {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 60px 20px 40px;
+            margin-top: 80px;
+            color: var(--text-secondary);
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .footer strong {
+            color: var(--brand-blue);
+        }
+
+        .footer a {
+            color: var(--brand-blue);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 0 30px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .header p {
+                font-size: 16px;
+            }
+
+            .calculator-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .features-section {
+                margin-top: 60px;
+                padding: 30px 15px;
+            }
+
+            .features-title {
+                font-size: 26px;
+            }
+
+            .logo {
+                height: 60px;
+            }
+
+            .card-header {
+                padding: 30px 25px;
+            }
+
+            .card-body {
+                padding: 25px 20px;
+            }
+        }
+
+        /* Hover effect for mobile */
+        @media (hover: none) {
+            .calculator-card:hover {
+                transform: none;
+            }
+            
+            .feature-item:hover {
+                transform: none;
+            }
+        }
+        /* Force all text to be dark */
+        h1, h2, h3, h4, h5, h6, p, span, div {
+            color: #333333 !important;
+        }
+        
+        .header h1, .header p {
+            color: #333333 !important;
+        }
+        
+        .features-title {
+            color: #03143A !important;
+        }
+        
+        .feature-title {
+            color: #333333 !important;
+        }
+        
+        .feature-desc {
+            color: #666666 !important;
+        }
+        
+        .footer {
+            color: #666666 !important;
+        }
+        
+        .feature-list span {
+            color: #333333 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <img src="https://primefacilityservicesgroup.com/wp-content/uploads/2024/02/Logo-Prime-Facility-White-No-Background-1.png"
+                alt="Prime Facility Services Group" class="logo">
+            <h1>Business Calculator Suite</h1>
+            <p>Professional tools to optimize your facility services operations</p>
+        </header>
+
+        <!-- Calculator Grid -->
+        <div class="calculator-grid">
+            <!-- Janitorial Calculator Card -->
+            <div class="calculator-card" onclick="window.location.href='Janitorial Calculator/index.html'">
+                <div class="card-header">
+                    <i class="fas fa-broom card-icon"></i>
+                    <h2 class="card-title">Kitchen Cleaning Calculator</h2>
+                    <p class="card-subtitle">Generate professional cleaning quotes instantly</p>
+                </div>
+                <div class="card-body">
+                    <ul class="feature-list">
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Calculate labor, materials, and equipment costs</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Hood cleaning pricing with frequency discounts</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Automated profit optimization to 62% cost ratio</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Professional PDF quotes with company branding</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Subcontractor cost comparison</span>
+                        </li>
+                    </ul>
+                    <a href="Janitorial Calculator/index.html" class="launch-btn">
+                        Launch Calculator <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Timesheet Calculator Card -->
+            <div class="calculator-card" onclick="window.location.href='Timesheet Calculator/index.html'">
+                <div class="card-header">
+                    <i class="fas fa-clock card-icon"></i>
+                    <h2 class="card-title">Timesheet Calculator</h2>
+                    <p class="card-subtitle">Track hours and calculate labor costs efficiently</p>
+                </div>
+                <div class="card-body">
+                    <ul class="feature-list">
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Weekly timesheet for multiple positions</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Automatic labor cost calculations with taxes</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Visual charts for hours and cost breakdown</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Revenue and profit margin analysis</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>PDF timesheet reports with financial summary</span>
+                        </li>
+                    </ul>
+                    <a href="Timesheet Calculator/index.html" class="launch-btn">
+                        Launch Calculator <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <section class="features-section">
+            <h2 class="features-title">Why Use Our Calculators?</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="fas fa-tachometer-alt feature-icon"></i>
+                    <h3 class="feature-title">Save Time</h3>
+                    <p class="feature-desc">Generate accurate quotes and timesheets in minutes, not hours. Focus on
+                        growing your business.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-chart-line feature-icon"></i>
+                    <h3 class="feature-title">Maximize Profits</h3>
+                    <p class="feature-desc">Built-in optimization ensures healthy profit margins while remaining
+                        competitive.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-shield-alt feature-icon"></i>
+                    <h3 class="feature-title">Professional Results</h3>
+                    <p class="feature-desc">Create polished, branded documents that impress clients and streamline
+                        operations.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-mobile-alt feature-icon"></i>
+                    <h3 class="feature-title">Works Everywhere</h3>
+                    <p class="feature-desc">Access from any device with a web browser. No installation or downloads
+                        required.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Designed and developed by <strong>Christian Reyes</strong> for <strong>Prime Facility Services
+                    Group</strong></p>
+            <p style="margin-top: 10px;">© 2024 Prime Facility Services Group. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+
+</html>

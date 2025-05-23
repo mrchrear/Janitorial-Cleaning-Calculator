@@ -1,16 +1,16 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Professional timesheet calculator for tracking labor hours and costs">
     <title>Timesheet Calculator - Prime Facility Services Group</title>
-    
+
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    
+
     <style>
         :root {
             --brand-blue: #03143A;
@@ -27,8 +27,8 @@
             --bg-card: white;
             --bg-dark: #1e1e1e;
             --bg-dark-card: #222;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
-            --shadow-md: 0 4px 15px rgba(0,0,0,0.1);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.1);
             --transition-default: all 0.3s ease;
         }
 
@@ -50,6 +50,54 @@
             margin: 0 auto;
             background-color: var(--bg-card);
             box-shadow: var(--shadow-md);
+        }
+
+        /* Top Navigation Bar */
+        .top-navigation {
+            background-color: #011127;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link.active {
+            background-color: #C70532;
         }
 
         /* Header */
@@ -81,7 +129,7 @@
         .nav-tabs {
             display: flex;
             background-color: var(--brand-blue);
-            border-top: 1px solid rgba(255,255,255,0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .nav-tab {
@@ -107,7 +155,7 @@
         }
 
         .nav-tab:hover:not(.active) {
-            background-color: rgba(255,255,255,0.1);
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         .nav-tab-right {
@@ -482,10 +530,21 @@
             color: white;
         }
 
-        .notification-success { background-color: var(--success-green); }
-        .notification-error { background-color: var(--danger-red); }
-        .notification-info { background-color: var(--brand-blue); }
-        .notification-warning { background-color: var(--warning-orange); }
+        .notification-success {
+            background-color: var(--success-green);
+        }
+
+        .notification-error {
+            background-color: var(--danger-red);
+        }
+
+        .notification-info {
+            background-color: var(--brand-blue);
+        }
+
+        .notification-warning {
+            background-color: var(--warning-orange);
+        }
 
         .notification-close {
             position: absolute;
@@ -496,8 +555,15 @@
         }
 
         @keyframes slide-in {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         /* Dark Mode */
@@ -522,18 +588,38 @@
 
         /* Responsive */
         @media (max-width: 768px) {
+
             .summary-grid,
             .metrics-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .header {
                 flex-direction: column;
                 text-align: center;
             }
-            
+
             .logo {
                 margin-top: 10px;
+            }
+
+            /* Top Navigation responsive */
+            .nav-container {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .nav-link {
+                font-size: 12px;
+                padding: 6px 12px;
             }
         }
 
@@ -542,7 +628,7 @@
             body {
                 background-color: white;
             }
-            
+
             .nav-tabs,
             .action-buttons,
             .btn,
@@ -552,7 +638,28 @@
         }
     </style>
 </head>
+
 <body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-navigation">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo">
+                <img src="https://primefacilityservicesgroup.com/wp-content/uploads/2024/02/Logo-Prime-Facility-White-No-Background-1.png"
+                    alt="Prime Facility Services" style="height:40px;">
+            </a>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="#" class="nav-link active">
+                    <i class="fas fa-clock"></i> Timesheet Calculator
+                </a>
+                <a href="../Janitorial Calculator/index.html" class="nav-link">
+                    <i class="fas fa-broom"></i> Kitchen Calculator
+                </a>
+            </div>
+        </div>
+    </nav>
     <div class="container">
         <!-- Header -->
         <div class="header">
@@ -560,11 +667,10 @@
                 <h1>Timesheet Calculator</h1>
                 <div class="header-subtitle">Manage employee hours and calculate labor costs efficiently</div>
             </div>
-            <img src="https://primefacilityservicesgroup.com/wp-content/uploads/2024/02/Logo-Prime-Facility-White-No-Background-1.png" 
-                 alt="Prime Facility Services Group" 
-                 class="logo">
+            <img src="https://primefacilityservicesgroup.com/wp-content/uploads/2024/02/Logo-Prime-Facility-White-No-Background-1.png"
+                alt="Prime Facility Services Group" class="logo">
         </div>
-        
+
         <!-- Navigation -->
         <nav class="nav-tabs">
             <button class="nav-tab active" data-tab="timesheet">
@@ -583,7 +689,7 @@
                 <i class="fas fa-moon"></i> Dark
             </button>
         </nav>
-        
+
         <!-- Content -->
         <main class="content">
             <!-- Timesheet Tab -->
@@ -634,7 +740,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="section-card">
                     <div class="section-header">
                         <h3><i class="fas fa-dollar-sign"></i> Labor Cost Summary</h3>
@@ -662,7 +768,7 @@
                                     <div class="value" id="totalLabor">$0.00</div>
                                 </div>
                             </div>
-                            
+
                             <div class="result-section">
                                 <div class="result-row">
                                     <div class="label">Current Markup:</div>
@@ -670,8 +776,10 @@
                                     <div class="details">
                                         <label>Adjust Markup:</label>
                                         <div class="slider-wrapper">
-                                            <input type="range" id="markupSlider" min="35" max="120" value="42" class="slider">
-                                            <input type="number" id="markupInput" min="35" max="120" value="42" class="slider-value">
+                                            <input type="range" id="markupSlider" min="35" max="120" value="42"
+                                                class="slider">
+                                            <input type="number" id="markupInput" min="35" max="120" value="42"
+                                                class="slider-value">
                                         </div>
                                         <div class="slider-hint">
                                             <span>Min: 35%</span>
@@ -694,7 +802,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="section-card" style="margin-top: 20px;">
                             <div class="section-header">
                                 <h3><i class="fas fa-chart-line"></i> Profit Breakdown</h3>
@@ -723,7 +831,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="action-buttons">
                             <button class="action-btn primary-action" id="downloadPdfBtn">
                                 <i class="fas fa-file-pdf"></i> Download PDF
@@ -735,7 +843,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Configuration Tab -->
             <div class="tab-content" data-content="config">
                 <div class="section-card">
@@ -757,7 +865,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <h4 style="margin: 20px 0 10px 0; color: var(--brand-blue);">Tax & Insurance Settings</h4>
                         <div class="input-row">
                             <div class="input-col">
@@ -775,7 +883,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <h4 style="margin: 20px 0 10px 0; color: var(--brand-blue);">Markup & Commission Settings</h4>
                         <div class="input-row">
                             <div class="input-col">
@@ -793,14 +901,14 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <button class="btn btn-primary" id="saveConfigBtn" style="margin-top: 20px;">
                             <i class="fas fa-save"></i> Save Configuration
                         </button>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Summary Tab -->
             <div class="tab-content" data-content="summary">
                 <div class="section-card">
@@ -824,7 +932,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="metrics-grid">
                             <div class="metric-card">
                                 <div class="metric-title">
@@ -860,17 +968,26 @@
     <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    
+
     <script>
         // Timesheet Calculator Application
-        (function() {
+        (function () {
             'use strict';
 
             // ===== State Management =====
             const state = {
-                positions: [
-                    { id: 1, name: 'Regular Worker', rate: 16, hours: [0, 0, 0, 0, 0, 0, 0] },
-                    { id: 2, name: 'Supervisor', rate: 18, hours: [0, 0, 0, 0, 0, 0, 0] }
+                positions: [{
+                    id: 1,
+                    name: 'Regular Worker',
+                    rate: 16,
+                    hours: [0, 0, 0, 0, 0, 0, 0]
+                },
+                {
+                    id: 2,
+                    name: 'Supervisor',
+                    rate: 18,
+                    hours: [0, 0, 0, 0, 0, 0, 0]
+                }
                 ],
                 nextId: 3,
                 config: {
@@ -893,15 +1010,15 @@
                 formatCurrency(amount) {
                     return '$' + (amount || 0).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
                 },
-                
+
                 formatPercentage(value) {
                     return (value || 0).toFixed(1) + '%';
                 },
-                
+
                 $(id) {
                     return document.getElementById(id);
                 },
-                
+
                 showNotification(message, type = 'info') {
                     let container = document.querySelector('.notification-container');
                     if (!container) {
@@ -909,28 +1026,28 @@
                         container.className = 'notification-container';
                         document.body.appendChild(container);
                     }
-                    
+
                     const notification = document.createElement('div');
                     notification.className = `notification notification-${type}`;
                     notification.innerHTML = `
                         ${message}
                         <span class="notification-close">&times;</span>
                     `;
-                    
+
                     container.appendChild(notification);
-                    
+
                     const closeBtn = notification.querySelector('.notification-close');
                     closeBtn.addEventListener('click', () => notification.remove());
-                    
+
                     setTimeout(() => {
                         notification.style.opacity = '0';
                         setTimeout(() => notification.remove(), 300);
                     }, 3000);
                 },
-                
+
                 debounce(func, wait) {
                     let timeout;
-                    return function(...args) {
+                    return function (...args) {
                         clearTimeout(timeout);
                         timeout = setTimeout(() => func.apply(this, args), wait);
                     };
@@ -941,12 +1058,12 @@
             function createPositionRow(position) {
                 const row = document.createElement('tr');
                 row.dataset.positionId = position.id;
-                
+
                 const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                const hourInputs = position.hours.map((hours, i) => 
+                const hourInputs = position.hours.map((hours, i) =>
                     `<td><input type="number" class="hours-input" data-day="${i}" value="${hours || ''}" min="0" max="24" step="0.5"></td>`
                 ).join('');
-                
+
                 row.innerHTML = `
                     <td><input type="text" class="position-input" value="${position.name}" placeholder="Position/Name"></td>
                     <td><input type="number" class="rate-input" value="${position.rate}" min="0" step="0.01"></td>
@@ -958,7 +1075,7 @@
                         </button>
                     </td>
                 `;
-                
+
                 return row;
             }
 
@@ -969,11 +1086,11 @@
                     rate: state.config.regularPayRate,
                     hours: [0, 0, 0, 0, 0, 0, 0]
                 };
-                
+
                 state.positions.push(newPosition);
                 const tbody = utils.$('timesheetRows');
                 tbody.appendChild(createPositionRow(newPosition));
-                
+
                 updateTotals();
                 utils.showNotification('Position added', 'success');
             }
@@ -983,11 +1100,11 @@
                     utils.showNotification('At least one position is required', 'warning');
                     return;
                 }
-                
+
                 state.positions = state.positions.filter(p => p.id !== positionId);
                 const row = document.querySelector(`tr[data-position-id="${positionId}"]`);
                 row.remove();
-                
+
                 updateTotals();
                 utils.showNotification('Position removed', 'info');
             }
@@ -996,18 +1113,18 @@
             function updateRowTotal(row) {
                 const inputs = row.querySelectorAll('.hours-input');
                 let total = 0;
-                
+
                 inputs.forEach(input => {
                     total += parseFloat(input.value) || 0;
                 });
-                
+
                 row.querySelector('.total-hours').textContent = total.toFixed(1);
             }
 
             function updateTotals() {
                 const dayTotals = [0, 0, 0, 0, 0, 0, 0];
                 let grandTotal = 0;
-                
+
                 // Calculate totals
                 state.positions.forEach(position => {
                     position.hours.forEach((hours, day) => {
@@ -1015,17 +1132,17 @@
                         grandTotal += hours;
                     });
                 });
-                
+
                 // Update day totals
                 dayTotals.forEach((total, day) => {
                     const cell = document.querySelector(`.day-total[data-day="${day}"]`);
                     if (cell) cell.textContent = total.toFixed(1);
                 });
-                
+
                 // Update grand total
                 const grandTotalCell = document.querySelector('.grand-total');
                 if (grandTotalCell) grandTotalCell.textContent = grandTotal.toFixed(1);
-                
+
                 // Calculate costs
                 calculateCosts();
             }
@@ -1037,27 +1154,27 @@
                     const totalHours = position.hours.reduce((sum, h) => sum + h, 0);
                     laborCost += totalHours * position.rate;
                 });
-                
+
                 // Calculate taxes and insurance
                 const laborTax = laborCost * state.config.taxRate;
                 const workComp = laborCost * (state.config.workCompRate / 100);
                 const totalLaborCost = laborCost + laborTax + workComp;
-                
+
                 // Calculate markup and revenue
                 const markupAmount = totalLaborCost * (state.currentMarkup / 100);
                 const weeklyRevenue = totalLaborCost + markupAmount;
                 const monthlyRevenue = weeklyRevenue * 4.33;
-                
+
                 // Calculate profit
                 const weeklyProfit = markupAmount;
                 const monthlyProfit = weeklyProfit * 4.33;
                 const commission = monthlyProfit * state.config.commissionRate;
                 const finalProfit = monthlyProfit - commission;
-                
+
                 // Calculate daily profit
                 const daysWithData = state.positions[0].hours.filter(h => h > 0).length || 1;
                 const dailyProfit = weeklyProfit / daysWithData;
-                
+
                 // Update UI
                 utils.$('laborCost').textContent = utils.formatCurrency(laborCost);
                 utils.$('laborTax').textContent = utils.formatCurrency(laborTax);
@@ -1071,16 +1188,16 @@
                 utils.$('monthlyProfit').textContent = utils.formatCurrency(monthlyProfit);
                 utils.$('commission').textContent = utils.formatCurrency(commission);
                 utils.$('finalProfit').textContent = utils.formatCurrency(finalProfit);
-                
+
                 // Update metrics
-                const totalHours = state.positions.reduce((sum, p) => 
+                const totalHours = state.positions.reduce((sum, p) =>
                     sum + p.hours.reduce((s, h) => s + h, 0), 0
                 );
-                
+
                 const revenuePerHour = totalHours > 0 ? weeklyRevenue / totalHours : 0;
                 const profitMargin = weeklyRevenue > 0 ? (weeklyProfit / weeklyRevenue) * 100 : 0;
                 const avgHoursPerDay = daysWithData > 0 ? totalHours / daysWithData : 0;
-                
+
                 utils.$('revenuePerHour').textContent = utils.formatCurrency(revenuePerHour);
                 utils.$('profitMargin').textContent = utils.formatPercentage(profitMargin);
                 utils.$('avgHoursPerDay').textContent = avgHoursPerDay.toFixed(1);
@@ -1090,11 +1207,11 @@
             // ===== Charts =====
             function updateCharts() {
                 if (typeof Chart === 'undefined') return;
-                
+
                 // Destroy existing charts
                 if (state.charts.hours) state.charts.hours.destroy();
                 if (state.charts.cost) state.charts.cost.destroy();
-                
+
                 // Get data
                 const dayTotals = [0, 0, 0, 0, 0, 0, 0];
                 state.positions.forEach(position => {
@@ -1102,17 +1219,17 @@
                         dayTotals[day] += hours;
                     });
                 });
-                
+
                 const hasData = dayTotals.some(h => h > 0);
-                
+
                 // Show/hide placeholders
                 utils.$('hoursPlaceholder').style.display = hasData ? 'none' : 'flex';
                 utils.$('hoursChart').style.display = hasData ? 'block' : 'none';
                 utils.$('costPlaceholder').style.display = hasData ? 'none' : 'flex';
                 utils.$('costChart').style.display = hasData ? 'block' : 'none';
-                
+
                 if (!hasData) return;
-                
+
                 // Hours chart
                 state.charts.hours = new Chart(utils.$('hoursChart'), {
                     type: 'bar',
@@ -1131,13 +1248,13 @@
                         maintainAspectRatio: false
                     }
                 });
-                
+
                 // Cost breakdown chart
                 const laborCost = parseFloat(utils.$('laborCost').textContent.replace(/[$,]/g, ''));
                 const laborTax = parseFloat(utils.$('laborTax').textContent.replace(/[$,]/g, ''));
                 const workComp = parseFloat(utils.$('workComp').textContent.replace(/[$,]/g, ''));
                 const profit = parseFloat(utils.$('weeklyProfit').textContent.replace(/[$,]/g, ''));
-                
+
                 state.charts.cost = new Chart(utils.$('costChart'), {
                     type: 'pie',
                     data: {
@@ -1163,52 +1280,52 @@
             function initEventListeners() {
                 // Tab navigation
                 document.querySelectorAll('.nav-tab[data-tab]').forEach(tab => {
-                    tab.addEventListener('click', function() {
+                    tab.addEventListener('click', function () {
                         const tabName = this.dataset.tab;
-                        
+
                         // Update active tab
                         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
                         this.classList.add('active');
-                        
+
                         // Show content
                         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                         document.querySelector(`[data-content="${tabName}"]`).classList.add('active');
-                        
+
                         // Update charts if summary tab
                         if (tabName === 'summary') {
                             setTimeout(updateCharts, 100);
                         }
                     });
                 });
-                
+
                 // Add position button
                 utils.$('addPositionBtn').addEventListener('click', addPosition);
-                
+
                 // Reset button
                 utils.$('resetBtn').addEventListener('click', () => {
                     if (confirm('Reset all data?')) {
                         resetCalculator();
                     }
                 });
-                
+
                 // Dark mode toggle
-                utils.$('darkModeBtn').addEventListener('click', function() {
+                utils.$('darkModeBtn').addEventListener('click', function () {
                     document.body.classList.toggle('dark-mode');
                     const icon = this.querySelector('i');
-                    icon.className = document.body.classList.contains('dark-mode') ? 
+                    icon.className = document.body.classList.contains('dark-mode') ?
                         'fas fa-sun' : 'fas fa-moon';
                 });
-                
+
                 // Table event delegation
                 const tbody = utils.$('timesheetRows');
-                tbody.addEventListener('input', utils.debounce(function(e) {
+                tbody.addEventListener('input', utils.debounce(function (e) {
                     const target = e.target;
                     const row = target.closest('tr');
                     const positionId = parseInt(row.dataset.positionId);
                     const position = state.positions.find(p => p.id === positionId);
-                    
+
                     if (!position) return;
-                    
+
                     if (target.classList.contains('position-input')) {
                         position.name = target.value;
                     } else if (target.classList.contains('rate-input')) {
@@ -1221,27 +1338,27 @@
                         updateTotals();
                     }
                 }, 300));
-                
-                tbody.addEventListener('click', function(e) {
+
+                tbody.addEventListener('click', function (e) {
                     if (e.target.closest('.delete-btn')) {
                         const row = e.target.closest('tr');
                         const positionId = parseInt(row.dataset.positionId);
                         deletePosition(positionId);
                     }
                 });
-                
+
                 // Markup slider
                 const markupSlider = utils.$('markupSlider');
                 const markupInput = utils.$('markupInput');
-                
-                markupSlider.addEventListener('input', function() {
+
+                markupSlider.addEventListener('input', function () {
                     state.currentMarkup = parseInt(this.value);
                     markupInput.value = this.value;
                     utils.$('markupPercentage').textContent = this.value;
                     calculateCosts();
                 });
-                
-                markupInput.addEventListener('input', function() {
+
+                markupInput.addEventListener('input', function () {
                     const value = parseInt(this.value);
                     if (value >= 35 && value <= 120) {
                         state.currentMarkup = value;
@@ -1250,10 +1367,10 @@
                         calculateCosts();
                     }
                 });
-                
+
                 // Configuration save
                 utils.$('saveConfigBtn').addEventListener('click', saveConfig);
-                
+
                 // PDF and Print
                 utils.$('downloadPdfBtn').addEventListener('click', generatePDF);
                 utils.$('printBtn').addEventListener('click', () => window.print());
@@ -1267,8 +1384,8 @@
                 utils.$('workCompRate').value = state.config.workCompRate;
                 utils.$('defaultMarkup').value = state.config.defaultMarkup;
                 utils.$('commissionRate').value = state.config.commissionRate * 100;
-                
-                utils.$('workCompDetails').textContent = 
+
+                utils.$('workCompDetails').textContent =
                     `$${state.config.workCompRate} per $100 of labor cost`;
             }
 
@@ -1279,20 +1396,20 @@
                 state.config.workCompRate = parseFloat(utils.$('workCompRate').value) || 1.88;
                 state.config.defaultMarkup = parseFloat(utils.$('defaultMarkup').value) || 42;
                 state.config.commissionRate = parseFloat(utils.$('commissionRate').value) / 100 || 0.20;
-                
+
                 // Update current markup if needed
                 state.currentMarkup = state.config.defaultMarkup;
                 utils.$('markupSlider').value = state.config.defaultMarkup;
                 utils.$('markupInput').value = state.config.defaultMarkup;
                 utils.$('markupPercentage').textContent = state.config.defaultMarkup;
-                
+
                 // Update worker's comp details
-                utils.$('workCompDetails').textContent = 
+                utils.$('workCompDetails').textContent =
                     `$${state.config.workCompRate} per $100 of labor cost`;
-                
+
                 // Recalculate
                 updateTotals();
-                
+
                 // Show success and switch to timesheet tab
                 utils.showNotification('Configuration saved successfully', 'success');
                 document.querySelector('[data-tab="timesheet"]').click();
@@ -1304,24 +1421,26 @@
                     utils.showNotification('PDF library not loaded', 'error');
                     return;
                 }
-                
-                const { jsPDF } = window.jspdf;
+
+                const {
+                    jsPDF
+                } = window.jspdf;
                 const doc = new jsPDF('landscape');
-                
+
                 // Header
                 doc.setFontSize(20);
                 doc.setTextColor(3, 20, 58);
                 doc.text('Timesheet Report', 20, 20);
-                
+
                 doc.setFontSize(12);
                 doc.setTextColor(100);
                 doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 30);
                 doc.text('Prime Facility Services Group', 200, 20);
-                
+
                 // Table data
                 const tableData = [];
                 tableData.push(['Position/Employee', 'Rate', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Total']);
-                
+
                 state.positions.forEach(position => {
                     const total = position.hours.reduce((sum, h) => sum + h, 0);
                     tableData.push([
@@ -1331,7 +1450,7 @@
                         total.toFixed(1)
                     ]);
                 });
-                
+
                 // Add totals row
                 const dayTotals = [0, 0, 0, 0, 0, 0, 0];
                 state.positions.forEach(position => {
@@ -1340,14 +1459,14 @@
                     });
                 });
                 const grandTotal = dayTotals.reduce((sum, h) => sum + h, 0);
-                
+
                 tableData.push([
                     'Daily Totals',
                     '',
                     ...dayTotals.map(h => h.toFixed(1)),
                     grandTotal.toFixed(1)
                 ]);
-                
+
                 // Add table
                 doc.autoTable({
                     head: [tableData[0]],
@@ -1356,12 +1475,12 @@
                     startY: 40,
                     theme: 'grid'
                 });
-                
+
                 // Add financial summary
                 const finalY = doc.autoTable.previous.finalY + 10;
                 doc.setFontSize(14);
                 doc.text('Financial Summary', 20, finalY);
-                
+
                 const summaryData = [
                     ['Labor Cost', utils.$('laborCost').textContent],
                     ['Labor Tax', utils.$('laborTax').textContent],
@@ -1375,14 +1494,14 @@
                     ['Commission', utils.$('commission').textContent],
                     ['Final Profit', utils.$('finalProfit').textContent]
                 ];
-                
+
                 doc.autoTable({
                     body: summaryData,
                     startY: finalY + 5,
                     tableWidth: 100,
                     theme: 'grid'
                 });
-                
+
                 // Save PDF
                 doc.save('timesheet-report.pdf');
                 utils.showNotification('PDF generated successfully', 'success');
@@ -1390,25 +1509,34 @@
 
             // ===== Reset =====
             function resetCalculator() {
-                state.positions = [
-                    { id: 1, name: 'Regular Worker', rate: state.config.regularPayRate, hours: [0, 0, 0, 0, 0, 0, 0] },
-                    { id: 2, name: 'Supervisor', rate: state.config.supervisorPayRate, hours: [0, 0, 0, 0, 0, 0, 0] }
+                state.positions = [{
+                    id: 1,
+                    name: 'Regular Worker',
+                    rate: state.config.regularPayRate,
+                    hours: [0, 0, 0, 0, 0, 0, 0]
+                },
+                {
+                    id: 2,
+                    name: 'Supervisor',
+                    rate: state.config.supervisorPayRate,
+                    hours: [0, 0, 0, 0, 0, 0, 0]
+                }
                 ];
                 state.nextId = 3;
                 state.currentMarkup = state.config.defaultMarkup;
-                
+
                 // Reset UI
                 const tbody = utils.$('timesheetRows');
                 tbody.innerHTML = '';
                 state.positions.forEach(position => {
                     tbody.appendChild(createPositionRow(position));
                 });
-                
+
                 // Reset markup
                 utils.$('markupSlider').value = state.config.defaultMarkup;
                 utils.$('markupInput').value = state.config.defaultMarkup;
                 utils.$('markupPercentage').textContent = state.config.defaultMarkup;
-                
+
                 updateTotals();
                 utils.showNotification('Calculator reset', 'info');
             }
@@ -1417,16 +1545,16 @@
             function init() {
                 // Load config
                 loadConfig();
-                
+
                 // Create initial rows
                 const tbody = utils.$('timesheetRows');
                 state.positions.forEach(position => {
                     tbody.appendChild(createPositionRow(position));
                 });
-                
+
                 // Initialize event listeners
                 initEventListeners();
-                
+
                 // Initial calculation
                 updateTotals();
             }
@@ -1436,4 +1564,5 @@
         })();
     </script>
 </body>
+
 </html>

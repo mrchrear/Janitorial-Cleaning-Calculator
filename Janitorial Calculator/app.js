@@ -28,7 +28,7 @@ const state = {
     isHoliday: false,
     outsideHouston: false,
     includeInsurance: true,
-    
+
     // Configuration
     config: {
         regularPayRate: 16,
@@ -40,7 +40,7 @@ const state = {
         workCompRate: 1.88,
         glRate: 7.33
     },
-    
+
     // Options
     options: {
         includeTransport: true,
@@ -65,7 +65,7 @@ const state = {
         residualPercentageValue: 10,
         enableAutoCostOptimization: false
     },
-    
+
     // UI State
     ui: {
         sectionStates: {},
@@ -77,7 +77,7 @@ const state = {
         valueHistory: {}, // For tracking value changes
         toastQueue: []
     },
-    
+
     // Calculation results cache
     results: {
         laborCost: 0,
@@ -105,7 +105,7 @@ const state = {
         finalCompanyProfit: 0,
         splitCommissions: []
     },
-    
+
     // History for undo/redo functionality
     history: {
         snapshots: [],
@@ -182,36 +182,36 @@ const deepClone = (obj) => {
 const highlightElement = (id, className = 'highlight-change', duration = 1500) => {
     const el = $(id);
     if (!el) return;
-    
+
     // Don't highlight if this element is already highlighted
     if (state.ui.highlightedElements.has(id)) return;
-    
+
     // Store current value for comparison
     const currentValue = el.textContent;
     const previousValue = state.ui.valueHistory[id] || currentValue;
-    
+
     // Check if value has changed significantly (more than 0.5%)
     const oldValue = extractNumericValue(previousValue);
     const newValue = extractNumericValue(currentValue);
-    
+
     if (!isNaN(oldValue) && !isNaN(newValue) && oldValue !== 0) {
         const percentChange = Math.abs((newValue - oldValue) / oldValue) * 100;
-        
+
         if (percentChange > 0.5) {
             // Add to set of highlighted elements
             state.ui.highlightedElements.add(id);
-            
+
             // Add special class for an increase or decrease
             const changeClass = newValue > oldValue ? 'value-increased' : 'value-decreased';
             el.classList.add(className, changeClass);
-            
+
             // Show notification for significant changes (more than 15%)
             if (percentChange > 15) {
                 const changeType = newValue > oldValue ? 'increased' : 'decreased';
                 const message = `<strong>${el.closest('.result-row, .profit-row, .result-total')?.querySelector('.label')?.textContent || 'Value'}</strong> ${changeType} by ${Math.round(percentChange)}%`;
                 queueToast(message, changeType === 'increased' ? 'warning' : 'success');
             }
-            
+
             // Remove the highlight after duration
             setTimeout(() => {
                 el.classList.remove(className, changeClass);
@@ -219,7 +219,7 @@ const highlightElement = (id, className = 'highlight-change', duration = 1500) =
             }, duration);
         }
     }
-    
+
     // Update stored value
     state.ui.valueHistory[id] = currentValue;
 };
@@ -231,7 +231,7 @@ const highlightElement = (id, className = 'highlight-change', duration = 1500) =
  */
 const queueToast = (message, type = 'info') => {
     state.ui.toastQueue.push({ message, type });
-    
+
     // If this is the only item in the queue, show it immediately
     if (state.ui.toastQueue.length === 1) {
         processToastQueue();
@@ -243,10 +243,10 @@ const queueToast = (message, type = 'info') => {
  */
 const processToastQueue = () => {
     if (state.ui.toastQueue.length === 0) return;
-    
+
     const { message, type } = state.ui.toastQueue[0];
     showNotification(message, type);
-    
+
     // Remove from queue and process next item after delay
     setTimeout(() => {
         state.ui.toastQueue.shift();
@@ -279,22 +279,22 @@ const saveSnapshot = () => {
         includeInsurance: state.includeInsurance,
         options: deepClone(state.options)
     };
-    
+
     // If we've used undo and then make changes, remove the future snapshots
     if (state.history.currentIndex < state.history.snapshots.length - 1) {
         state.history.snapshots = state.history.snapshots.slice(0, state.history.currentIndex + 1);
     }
-    
+
     // Add the snapshot and update the index
     state.history.snapshots.push(snapshot);
     state.history.currentIndex = state.history.snapshots.length - 1;
-    
+
     // Limit the number of snapshots
     if (state.history.snapshots.length > state.history.maxSnapshots) {
         state.history.snapshots.shift();
         state.history.currentIndex--;
     }
-    
+
     // Enable/disable undo/redo buttons (if they exist)
     updateUndoRedoButtons();
 };
@@ -305,12 +305,12 @@ const saveSnapshot = () => {
 const updateUndoRedoButtons = () => {
     const undoBtn = document.getElementById('undoBtn');
     const redoBtn = document.getElementById('redoBtn');
-    
+
     if (undoBtn) {
         undoBtn.disabled = state.history.currentIndex <= 0;
         undoBtn.setAttribute('aria-disabled', state.history.currentIndex <= 0);
     }
-    
+
     if (redoBtn) {
         redoBtn.disabled = state.history.currentIndex >= state.history.snapshots.length - 1;
         redoBtn.setAttribute('aria-disabled', state.history.currentIndex >= state.history.snapshots.length - 1);
@@ -323,9 +323,9 @@ const updateUndoRedoButtons = () => {
  */
 const applySnapshot = (index) => {
     if (index < 0 || index >= state.history.snapshots.length) return;
-    
+
     const snapshot = state.history.snapshots[index];
-    
+
     // Apply the snapshot to the state
     Object.assign(state, {
         useSubcontractor: snapshot.useSubcontractor,
@@ -345,11 +345,11 @@ const applySnapshot = (index) => {
         includeInsurance: snapshot.includeInsurance,
         options: deepClone(snapshot.options)
     });
-    
+
     // Update the UI to match the state
     updateUIFromState();
     calculateAll();
-    
+
     // Update the current index and button states
     state.history.currentIndex = index;
     updateUndoRedoButtons();
@@ -383,7 +383,7 @@ const redo = () => {
  */
 const debounce = (func, wait) => {
     let timeout;
-    return function(...args) {
+    return function (...args) {
         const context = this;
         clearTimeout(timeout);
         timeout = setTimeout(() => func.apply(context, args), wait);
@@ -461,7 +461,7 @@ const checkBrowserSupport = () => {
         localStorage: false,
         downloadAPI: 'download' in document.createElement('a')
     };
-    
+
     // Check localStorage
     try {
         localStorage.setItem('test', 'test');
@@ -470,7 +470,7 @@ const checkBrowserSupport = () => {
     } catch (e) {
         support.localStorage = false;
     }
-    
+
     return support;
 };
 
@@ -493,9 +493,9 @@ function initEventListeners() {
         }
         showContent('quotationContent');
     });
-    
+
     $('configTab').addEventListener('click', () => showContent('configContent'));
-    
+
     $('breakdownTab').addEventListener('click', () => {
         // Check for unsaved changes in config
         if (state.ui.hasUnsavedConfigChanges) {
@@ -506,36 +506,36 @@ function initEventListeners() {
                 updateUnsavedChangesIndicator();
             }
         }
-        
+
         showContent('quotationContent');
         const resultsEl = document.querySelector('.results-column') || document.querySelector('.result-section');
-        if (resultsEl) resultsEl.scrollIntoView({behavior: 'smooth'});
+        if (resultsEl) resultsEl.scrollIntoView({ behavior: 'smooth' });
     });
-    
+
     $('resetBtn').addEventListener('click', resetCalculator);
     $('darkModeToggle').addEventListener('click', toggleDarkMode);
-    
+
     // Toggle sections
     document.querySelectorAll('.toggle-section').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             toggleSection(this.getAttribute('data-target'), this);
         });
     });
-    
+
     // Advanced options toggle
-    $('advancedOptionsToggle').addEventListener('click', function() {
+    $('advancedOptionsToggle').addEventListener('click', function () {
         const content = $('advancedOptionsContent');
         const icon = this.querySelector('i.fas');
         content.classList.toggle('visible');
         icon.className = content.classList.contains('visible') ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
     });
-    
+
     // Operational costs toggle
-    $('operationalCostsRow').addEventListener('click', function() {
+    $('operationalCostsRow').addEventListener('click', function () {
         this.classList.toggle('expanded');
         const icon = this.querySelector('i.fas');
         const details = $('operationalCostsDetails');
-        
+
         if (this.classList.contains('expanded')) {
             details.style.display = 'block';
             icon.className = 'fas fa-chevron-up';
@@ -546,50 +546,50 @@ function initEventListeners() {
             state.ui.operationalCostsExpanded = false;
         }
     });
-    
+
     // Setup checkbox handlers using event delegation
     document.addEventListener('change', e => {
         if (e.target.type === 'checkbox') {
             handleCheckboxChange(e.target);
         }
     });
-    
+
     // Handle numeric input and percentage input changes with debounce
     document.addEventListener('input', debounce(e => {
         if (e.target.type === 'number' || e.target.classList.contains('commission-split-input')) {
             handleNumericInput(e.target);
         }
-        
+
         // Track configuration changes
         if (e.target.closest('#configContent')) {
             state.ui.hasUnsavedConfigChanges = true;
             updateUnsavedChangesIndicator();
         }
     }, 300));
-    
+
     // Add commission split button
-    $('addCommissionSplitBtn').addEventListener('click', function() {
+    $('addCommissionSplitBtn').addEventListener('click', function () {
         state.options.commissionSplits.push(0);
         updateCommissionSplitInputs();
         saveSnapshot();
         calculateAll();
     });
-    
+
     // Markup Slider
-    $('markupSlider').addEventListener('input', function() {
+    $('markupSlider').addEventListener('input', function () {
         const value = parseInt(this.value);
         state.options.customMarkupPercentage = value;
         $('markupInput').value = value;
         calculateAll();
     });
-    
+
     // Save configuration button
-    $('saveConfigBtn').addEventListener('click', function() {
+    $('saveConfigBtn').addEventListener('click', function () {
         if (!validateAllInputs()) {
             showNotification('Please fix the errors before saving configuration.', 'error');
             return;
         }
-        
+
         // Update configuration values
         state.config.regularPayRate = parseFloat($('regularPayRate').value) || 16;
         state.config.supervisorPayRate = parseFloat($('supervisorPayRate').value) || 18;
@@ -599,35 +599,35 @@ function initEventListeners() {
         state.config.smallHoodPrice = parseFloat($('smallHoodPriceConfig').value) || 550;
         state.config.workCompRate = parseFloat($('workCompRate').value) || 1.88;
         state.config.glRate = parseFloat($('glRate').value) || 7.33;
-        
+
         // Reset unsaved changes indicator
         state.ui.hasUnsavedConfigChanges = false;
         updateUnsavedChangesIndicator();
-        
+
         // Update UI elements that display configuration values
         updateHoodPriceLabels();
         updateInsuranceDetails();
-        
+
         saveSnapshot();
         calculateAll();
         showContent('quotationContent');
         showNotification('Configuration saved successfully.', 'success');
     });
-    
+
     // Print and Export buttons
-    $('printQuoteBtn').addEventListener('click', function() {
+    $('printQuoteBtn').addEventListener('click', function () {
         preparePdfOrPrint('print');
     });
-    
-    $('downloadPdfBtn').addEventListener('click', function() {
+
+    $('downloadPdfBtn').addEventListener('click', function () {
         preparePdfOrPrint('pdf');
     });
-    
+
     $('screenshotBtn').addEventListener('click', captureScreenshot);
-    
+
     // Modal close buttons
     document.querySelectorAll('.close-modal').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const modal = this.closest('.modal');
             if (modal) {
                 modal.classList.remove('visible');
@@ -635,12 +635,12 @@ function initEventListeners() {
             }
         });
     });
-    
+
     // Initialize profit options classes
     updateProfitOptionClasses();
     updatePercentageDisplays();
     updateInsuranceDetails();
-    
+
     // Initialize configuration values
     $('workCompRate').value = state.config.workCompRate;
     $('glRate').value = state.config.glRate;
@@ -648,13 +648,13 @@ function initEventListeners() {
     $('smallHoodPriceConfig').value = state.config.smallHoodPrice;
     $('transportCostConfig').value = state.config.transportCostPerDay;
     $('outsideHoustonTransportConfig').value = state.config.outsideHoustonTransportCostPerDay;
-    
+
     // Add keyboard shortcuts
     document.addEventListener('keydown', handleKeyboardShortcuts);
-    
+
     // Save initial state for undo/redo
     saveSnapshot();
-    
+
     // Add input event listeners for config fields to track changes
     document.querySelectorAll('#configContent input').forEach(input => {
         input.addEventListener('change', () => {
@@ -662,25 +662,25 @@ function initEventListeners() {
             updateUnsavedChangesIndicator();
         });
     });
-    
+
     // Add undo/redo button listeners
     if ($('undoBtn')) {
         $('undoBtn').addEventListener('click', undo);
     }
-    
+
     if ($('redoBtn')) {
         $('redoBtn').addEventListener('click', redo);
     }
-    
+
     // Check browser support
     const support = checkBrowserSupport();
-    
+
     // Alert for missing features
     if (!support.html2canvas || !support.jsPDF) {
         const missingFeatures = [];
         if (!support.html2canvas) missingFeatures.push('HTML2Canvas (screenshot capture)');
         if (!support.jsPDF) missingFeatures.push('jsPDF (PDF generation)');
-        
+
         showNotification(`Some features are not available: ${missingFeatures.join(', ')}. Please check your internet connection.`, 'warning', 8000);
     }
 }
@@ -691,7 +691,7 @@ function initEventListeners() {
 function updateUnsavedChangesIndicator() {
     const configTab = $('configTab');
     if (!configTab) return;
-    
+
     if (state.ui.hasUnsavedConfigChanges) {
         if (!configTab.querySelector('.unsaved-indicator')) {
             const indicator = document.createElement('span');
@@ -718,7 +718,7 @@ function handleCheckboxChange(checkbox) {
         state.ui.hasUnsavedConfigChanges = true;
         updateUnsavedChangesIndicator();
     }
-    
+
     const checkboxHandlers = {
         'enableInitialFee': checked => {
             state.options.enableInitialFee = checked;
@@ -766,7 +766,7 @@ function handleCheckboxChange(checkbox) {
             updateCommissionSplitDisplay();
         }
     };
-    
+
     if (checkboxHandlers[checkbox.id]) {
         checkboxHandlers[checkbox.id](checkbox.checked);
         saveSnapshot();
@@ -791,10 +791,10 @@ function handleNumericInput(input) {
         'hoodLaborCostPerc': 'hoodLaborCostPerc',
         'hoodMaterialCostPerc': 'hoodMaterialCostPerc'
     };
-    
+
     if (percentageInputMap[input.id]) {
         const value = parseFloat(input.value) || 0;
-        
+
         if (input.id === 'residualPercentageValue') {
             state.options.residualPercentageValue = value;
             setContent('residualPercentageDisplay', value);
@@ -808,13 +808,13 @@ function handleNumericInput(input) {
         } else {
             state.options[input.id] = value;
         }
-        
+
         updatePercentageDisplays();
         saveSnapshot();
         calculateAll();
         return;
     }
-    
+
     // Handle commission split inputs
     if (input.classList.contains('commission-split-input')) {
         const index = parseInt(input.id.replace('commissionSplit', '')) - 1;
@@ -826,7 +826,7 @@ function handleNumericInput(input) {
         }
         return;
     }
-    
+
     // Handle numeric value inputs
     const valueInputMap = {
         'workers': { stateKey: 'workers', min: 0 }, // Changed min to 0 to allow 0 workers
@@ -841,14 +841,14 @@ function handleNumericInput(input) {
         'initialFeeValue': { stateKey: 'options.initialFeeValue', min: 0 },
         'markupInput': { stateKey: 'options.customMarkupPercentage', min: 20 }
     };
-    
+
     if (valueInputMap[input.id]) {
         const { stateKey, min } = valueInputMap[input.id];
         validateInput(input);
-        
+
         // Parse value and enforce minimum
         let value = Math.max(min, parseFloat(input.value) || min);
-        
+
         // Special handling for markup input
         if (input.id === 'markupInput') {
             input.value = value;
@@ -858,7 +858,7 @@ function handleNumericInput(input) {
             calculateAll();
             return;
         }
-        
+
         // Set state value
         if (stateKey.includes('.')) {
             const [obj, prop] = stateKey.split('.');
@@ -866,12 +866,12 @@ function handleNumericInput(input) {
         } else {
             state[stateKey] = value;
         }
-        
+
         // Special validation: enforce at least workers=0 when there are hood cleanings
         if (input.id === 'workers' || input.id === 'largeHoods' || input.id === 'smallHoods') {
             validateWorkersWithHoods();
         }
-        
+
         saveSnapshot();
         calculateAll();
     }
@@ -934,12 +934,12 @@ function handleKeyboardShortcuts(e) {
 function validateInput(input) {
     const errorElement = document.getElementById(input.id + 'Error');
     if (!errorElement) return true;
-    
+
     let isValid = true, errorMsg = '';
     const min = parseFloat(input.getAttribute('min'));
     const max = parseFloat(input.getAttribute('max'));
     const value = parseFloat(input.value);
-    
+
     if (input.value === '' || isNaN(value)) {
         isValid = false;
         errorMsg = 'Please enter a valid number';
@@ -950,12 +950,12 @@ function validateInput(input) {
         isValid = false;
         errorMsg = `Maximum value is ${max}`;
     }
-    
+
     input.classList.toggle('invalid-input', !isValid);
     errorElement.style.display = isValid ? 'none' : 'block';
     if (!isValid) errorElement.textContent = errorMsg;
     input.setAttribute('aria-invalid', !isValid);
-    
+
     return isValid;
 }
 
@@ -990,12 +990,12 @@ function updateProfitOptionClasses() {
     const customMarkupOption = $('customMarkupOption');
     const optimizeCostOption = $('optimizeCostOption');
     const residualOption = $('residualOption');
-    
+
     // Reset classes first
     customMarkupOption.classList.remove('active', 'disabled');
     optimizeCostOption.classList.remove('active', 'disabled');
     residualOption.classList.remove('active');
-    
+
     // Update based on state
     if (state.options.enableAutoCostOptimization) {
         optimizeCostOption.classList.add('active');
@@ -1007,7 +1007,7 @@ function updateProfitOptionClasses() {
         customMarkupOption.classList.add('active');
         customMarkupOption.setAttribute('aria-selected', true);
     }
-    
+
     if (state.options.enableResidualPercentage) {
         residualOption.classList.add('active');
         residualOption.setAttribute('aria-selected', true);
@@ -1049,11 +1049,11 @@ function updateInsuranceDetails() {
 function updateCommissionSplitInputs() {
     const splitsWrapper = $('commissionSplitsWrapper');
     const splitRows = $('splitCommissionRowsContent');
-    
+
     // Clear existing inputs and rows
     splitsWrapper.innerHTML = '';
     splitRows.innerHTML = '';
-    
+
     // Create input for each split
     state.options.commissionSplits.forEach((percentage, index) => {
         // Create input field
@@ -1061,10 +1061,10 @@ function updateCommissionSplitInputs() {
         inputContainer.className = 'percentage-option';
         inputContainer.style.marginBottom = '8px';
         inputContainer.innerHTML = `
-            <label for="commissionSplit${index+1}">Commission ${index+1}</label>
-            <input type="number" id="commissionSplit${index+1}" min="0" max="100" step="0.1" value="${percentage}" class="commission-split-input">
+            <label for="commissionSplit${index + 1}">Commission ${index + 1}</label>
+            <input type="number" id="commissionSplit${index + 1}" min="0" max="100" step="0.1" value="${percentage}" class="commission-split-input">
         `;
-        
+
         // Add delete button if more than 2 splits
         if (state.options.commissionSplits.length > 2) {
             const deleteBtn = document.createElement('button');
@@ -1077,8 +1077,8 @@ function updateCommissionSplitInputs() {
             deleteBtn.style.padding = '3px 6px';
             deleteBtn.style.cursor = 'pointer';
             deleteBtn.dataset.index = index;
-            deleteBtn.setAttribute('aria-label', `Remove Commission ${index+1}`);
-            deleteBtn.addEventListener('click', function() {
+            deleteBtn.setAttribute('aria-label', `Remove Commission ${index + 1}`);
+            deleteBtn.addEventListener('click', function () {
                 const idx = parseInt(this.dataset.index);
                 state.options.commissionSplits.splice(idx, 1);
                 updateCommissionSplitInputs();
@@ -1087,20 +1087,20 @@ function updateCommissionSplitInputs() {
             });
             inputContainer.appendChild(deleteBtn);
         }
-        
+
         splitsWrapper.appendChild(inputContainer);
-        
+
         // Create result row
         const resultRow = document.createElement('div');
         resultRow.className = 'profit-row commission-split-row';
         resultRow.dataset.index = index + 1;
         resultRow.innerHTML = `
-            <div class="label">Commission ${index+1} (<span class="commission-split-display">${percentage}</span>%):</div>
+            <div class="label">Commission ${index + 1} (<span class="commission-split-display">${percentage}</span>%):</div>
             <div class="value commission-split-value">$0.00</div>
         `;
         splitRows.appendChild(resultRow);
     });
-    
+
     // Update totals
     updateCommissionSplitTotals();
 }
@@ -1124,10 +1124,10 @@ function updateCommissionSplitDisplay(splitCommissions) {
         if (index < rows.length) {
             const percentageDisplay = rows[index].querySelector('.commission-split-display');
             const valueDisplay = rows[index].querySelector('.commission-split-value');
-            
+
             if (percentageDisplay) percentageDisplay.textContent = commission.percentage;
             if (valueDisplay) valueDisplay.textContent = formatCurrency(commission.amount);
-            
+
             // Highlight if values changed
             if (valueDisplay) highlightElement(valueDisplay.id || `commission-split-value-${index}`);
         }
@@ -1143,7 +1143,7 @@ function updateCommissionSplitDisplay(splitCommissions) {
 function showNotification(message, type = 'info', duration = 3000) {
     // Check if notification container exists
     let container = document.querySelector('.notification-container');
-    
+
     // Create container if it doesn't exist
     if (!container) {
         container = document.createElement('div');
@@ -1151,7 +1151,7 @@ function showNotification(message, type = 'info', duration = 3000) {
         container.setAttribute('role', 'alert');
         container.setAttribute('aria-live', 'polite');
         document.body.appendChild(container);
-        
+
         // Add styles if not already in CSS
         if (!document.querySelector('#notification-styles')) {
             const style = document.createElement('style');
@@ -1242,7 +1242,7 @@ function showNotification(message, type = 'info', duration = 3000) {
             document.head.appendChild(style);
         }
     }
-    
+
     // Create notification
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
@@ -1250,15 +1250,15 @@ function showNotification(message, type = 'info', duration = 3000) {
         ${message}
         <span class="notification-close" aria-label="Close notification">&times;</span>
     `;
-    
+
     // Add to container
     container.appendChild(notification);
-    
+
     // Auto remove after duration
     setTimeout(() => {
         notification.remove();
     }, duration);
-    
+
     // Close button functionality
     notification.querySelector('.notification-close').addEventListener('click', () => {
         notification.remove();
@@ -1275,7 +1275,7 @@ function showNotification(message, type = 'info', duration = 3000) {
 function toggleSection(sectionId, button) {
     const section = $(sectionId);
     const icon = button.querySelector('i');
-    
+
     if (section.classList.contains('hidden-section')) {
         section.classList.remove('hidden-section');
         icon.className = 'fas fa-chevron-up';
@@ -1301,17 +1301,17 @@ function showContent(contentId) {
         section.style.display = 'none';
         section.setAttribute('aria-hidden', 'true');
     });
-    
+
     // Show requested section
     $(contentId).style.display = 'block';
     $(contentId).setAttribute('aria-hidden', 'false');
-    
+
     // Update tab selection
     document.querySelectorAll('.nav-tab').forEach(tab => {
         tab.classList.remove('active');
         tab.setAttribute('aria-selected', 'false');
     });
-    
+
     // Set active tab
     let tabId;
     switch (contentId) {
@@ -1319,7 +1319,7 @@ function showContent(contentId) {
         case 'configContent': tabId = 'configTab'; break;
         default: tabId = 'quotationTab';
     }
-    
+
     $(tabId).classList.add('active');
     $(tabId).setAttribute('aria-selected', 'true');
 }
@@ -1329,12 +1329,12 @@ function showContent(contentId) {
  */
 function resetCalculator() {
     if (!confirm('Are you sure you want to reset the calculator? All current data will be lost.')) return;
-    
+
     // Save UI state and config
     const uiSectionStates = state.ui.sectionStates;
     const isDarkMode = state.ui.isDarkMode;
     const savedConfig = { ...state.config };
-    
+
     // Reset state to defaults but keep saved config
     Object.assign(state, {
         useSubcontractor: false,
@@ -1386,14 +1386,14 @@ function resetCalculator() {
             toastQueue: []
         }
     });
-    
+
     // Reset history
     state.history = {
         snapshots: [],
         currentIndex: -1,
         maxSnapshots: 20
     };
-    
+
     updateUIFromState();
     calculateAll();
     showContent('quotationContent');
@@ -1408,12 +1408,12 @@ function resetCalculator() {
 function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');
     state.ui.isDarkMode = document.body.classList.contains('dark-mode');
-    
+
     const btn = $('darkModeToggle');
     const icon = btn.querySelector('i');
     icon.className = state.ui.isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
     btn.setAttribute('aria-pressed', state.ui.isDarkMode);
-    
+
     // Update message based on current mode
     showNotification(`${state.ui.isDarkMode ? 'Dark' : 'Light'} mode activated`, 'info');
 }
@@ -1436,14 +1436,14 @@ function updateUIFromState() {
     $('isHoliday').checked = state.isHoliday;
     $('outsideHouston').checked = state.outsideHouston;
     $('includeInsurance').checked = state.includeInsurance;
-    
+
     // Hood cleaning
     $('largeHoods').value = state.largeHoods;
     $('smallHoods').value = state.smallHoods;
     $('hoodFrequency').value = state.hoodCleaningFrequency;
     $('hoodLaborCostPerc').value = state.hoodLaborCostPerc;
     $('hoodMaterialCostPerc').value = state.hoodMaterialCostPerc;
-    
+
     // Config values
     $('regularPayRate').value = state.config.regularPayRate;
     $('supervisorPayRate').value = state.config.supervisorPayRate;
@@ -1453,11 +1453,11 @@ function updateUIFromState() {
     $('smallHoodPriceConfig').value = state.config.smallHoodPrice;
     $('workCompRate').value = state.config.workCompRate;
     $('glRate').value = state.config.glRate;
-    
+
     // Update display values
     updateHoodPriceLabels();
     updateInsuranceDetails();
-    
+
     // Option checkboxes
     $('includeTransport').checked = state.options.includeTransport;
     $('includeMaterials').checked = state.options.includeMaterials;
@@ -1468,7 +1468,7 @@ function updateUIFromState() {
     $('useCustomMarkup').checked = state.options.useCustomMarkup;
     $('enableInitialFee').checked = state.options.enableInitialFee;
     $('enableResidualPercentage').checked = state.options.enableResidualPercentage;
-    
+
     // Toggle containers based on options
     $('splitCommissionContainer').style.display = state.options.enableCommissionSplit ? 'block' : 'none';
     $('salesCommissionRow').style.display = state.options.enableCommissionSplit ? 'none' : 'grid';
@@ -1476,10 +1476,10 @@ function updateUIFromState() {
     $('markupSliderContainer').style.display = state.options.useCustomMarkup ? 'block' : 'none';
     $('initialFeeContainer').style.display = state.options.enableInitialFee ? 'block' : 'none';
     $('residualPercentageContainer').style.display = state.options.enableResidualPercentage ? 'block' : 'none';
-    
+
     // Update profit option visuals
     updateProfitOptionClasses();
-    
+
     // Update slider and numeric inputs
     $('markupSlider').value = state.options.customMarkupPercentage;
     $('markupInput').value = state.options.customMarkupPercentage;
@@ -1493,13 +1493,13 @@ function updateUIFromState() {
     $('overheadPercentage').value = state.options.overheadPercentage;
     $('commissionPercentage').value = state.options.commissionPercentage;
     $('commissionPercentageDisplay').textContent = state.options.commissionPercentage;
-    
+
     // Update commission split inputs
     updateCommissionSplitInputs();
-    
+
     // Update percentage displays
     updatePercentageDisplays();
-    
+
     // Apply dark mode if enabled
     document.body.classList.toggle('dark-mode', state.ui.isDarkMode);
     if ($('darkModeToggle')) {
@@ -1507,7 +1507,7 @@ function updateUIFromState() {
         if (icon) icon.className = state.ui.isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
         $('darkModeToggle').setAttribute('aria-pressed', state.ui.isDarkMode);
     }
-    
+
     // Update unsaved changes indicator
     updateUnsavedChangesIndicator();
 }
@@ -1524,7 +1524,7 @@ function updateUIForSubcontractor(isSubcontractor, internalCost, subcontractorCo
         // Cross out internal costs since they're not what we'll actually pay
         document.querySelectorAll('#laborCost, #laborTax, #workCompCost, #transportCost, #materialsCost, #equipmentCost, #hoodCleaningCost')
             .forEach(el => el.classList.add('text-crossed'));
-        
+
         // Explain they are reference costs for final price calculation
         const costsText = 'Reference cost used for final price calculation';
         setHTML('laborDetails', costsText);
@@ -1534,16 +1534,16 @@ function updateUIForSubcontractor(isSubcontractor, internalCost, subcontractorCo
         setHTML('materialsDetails', costsText);
         setHTML('equipmentDetails', costsText);
         setHTML('hoodCleaningDetails', costsText);
-        
+
         // Show subcontractor cost and additional benefit
         setContent('subcontractorCostDisplay', formatCurrency(subcontractorCost));
         setContent('extraBenefitValue', formatCurrency(extraBenefit));
         toggleClass('extraBenefitValue', 'text-highlight', extraBenefit > 0);
-        
+
         // Show clearer text about savings
         setDisplay('extraBenefitRow', true);
         setHTML('extraBenefitDetails', 'Savings from using subcontractor instead of internal team (difference between internal costs and subcontractor cost)');
-        
+
         // Also show these savings in profit breakdown section
         setDisplay('subcontractorSavingRow', true);
         setContent('subcontractorSaving', formatCurrency(extraBenefit));
@@ -1551,17 +1551,17 @@ function updateUIForSubcontractor(isSubcontractor, internalCost, subcontractorCo
         // If not using a subcontractor, remove any cross-out styling
         document.querySelectorAll('#laborCost, #laborTax, #workCompCost, #transportCost, #materialsCost, #equipmentCost, #hoodCleaningCost')
             .forEach(el => el.classList.remove('text-crossed'));
-        
+
         // Generate labor details text
         let laborDetails = '';
         if (state.workers > 0) {
             if (state.days === 1 && state.workers > 1) {
-                laborDetails = `${state.workers-1} workers at ${formatCurrency(state.config.regularPayRate)}/hr × ${state.hours} hrs<br>` +
-                            `1 supervisor at ${formatCurrency(state.config.supervisorPayRate)}/hr × ${state.hours} hrs`;
+                laborDetails = `${state.workers - 1} workers at ${formatCurrency(state.config.regularPayRate)}/hr × ${state.hours} hrs<br>` +
+                    `1 supervisor at ${formatCurrency(state.config.supervisorPayRate)}/hr × ${state.hours} hrs`;
             } else if (state.workers > 0) {
                 laborDetails = `${state.workers} workers at ${formatCurrency(state.config.regularPayRate)}/hr × ${state.hours} hrs × ${state.days} days`;
             }
-            
+
             // Add hood labor costs if there are any hoods
             if (state.largeHoods > 0 || state.smallHoods > 0) {
                 laborDetails += `<br>Plus hood cleaning labor costs`;
@@ -1569,25 +1569,25 @@ function updateUIForSubcontractor(isSubcontractor, internalCost, subcontractorCo
         } else if (state.largeHoods > 0 || state.smallHoods > 0) {
             laborDetails = `Labor costs for hood cleaning only`;
         }
-        
+
         // Set details for each row
         setHTML('laborDetails', laborDetails);
         setHTML('laborTaxDetails', "17% mandatory employment taxes on labor");
         setHTML('workCompDetails', `$${state.config.workCompRate} per $100 of labor cost`);
-        
+
         // Transport details based on location
         let transportDetails = '';
         if (state.options.includeTransport) {
-            const transportRate = state.outsideHouston ? 
-                formatCurrency(state.config.outsideHoustonTransportCostPerDay) : 
+            const transportRate = state.outsideHouston ?
+                formatCurrency(state.config.outsideHoustonTransportCostPerDay) :
                 formatCurrency(state.config.transportCostPerDay);
-            
+
             transportDetails = `${transportRate} per day × ${state.days} days`;
-            
+
             if (state.days > 7) {
                 transportDetails += " (with long-term contract discount)";
             }
-            
+
             if (state.outsideHouston) {
                 transportDetails += " - Outside Houston rate";
             }
@@ -1595,12 +1595,12 @@ function updateUIForSubcontractor(isSubcontractor, internalCost, subcontractorCo
             transportDetails = "Transport cost excluded";
         }
         setHTML('transportDetails', transportDetails);
-        
+
         // Materials and equipment details
         let materialsDetails = "";
         if (state.options.includeMaterials) {
             materialsDetails = `${formatCurrency(state.materialsPerDay)} per day × ${state.days} days`;
-            
+
             // Add hood materials if there are any hoods
             if (state.largeHoods > 0 || state.smallHoods > 0) {
                 materialsDetails += `<br>Plus materials for hood cleaning`;
@@ -1609,11 +1609,11 @@ function updateUIForSubcontractor(isSubcontractor, internalCost, subcontractorCo
             materialsDetails = "Materials cost excluded";
         }
         setHTML('materialsDetails', materialsDetails);
-            
-        setHTML('equipmentDetails', state.options.includeEquipment ? 
-            `${formatCurrency(state.equipmentPerDay)} per day × ${state.days} days` : 
+
+        setHTML('equipmentDetails', state.options.includeEquipment ?
+            `${formatCurrency(state.equipmentPerDay)} per day × ${state.days} days` :
             "Equipment cost excluded");
-    
+
         // Hood cleaning details
         let hoodDetails = '';
         if (state.largeHoods > 0) {
@@ -1625,13 +1625,13 @@ function updateUIForSubcontractor(isSubcontractor, internalCost, subcontractorCo
         if (state.hoodCleaningFrequency > 1) {
             hoodDetails += `Frequency: ${state.hoodCleaningFrequency} times (with discount)`;
         }
-        
+
         if (state.largeHoods > 0 || state.smallHoods > 0) {
             hoodDetails += `<br>Labor: ${state.hoodLaborCostPerc}%, Materials: ${state.hoodMaterialCostPerc}% of price`;
         }
-        
+
         setHTML('hoodCleaningDetails', hoodDetails);
-        
+
         // Hide subcontractor-related rows
         setDisplay('extraBenefitRow', false);
         setDisplay('subcontractorSavingRow', false);
@@ -1645,161 +1645,161 @@ function updateUIForSubcontractor(isSubcontractor, internalCost, subcontractorCo
  */
 function calculateAll() {
     if (!validateAllInputs()) return;
-    
+
     // Set loading state
     setLoadingState(true);
-    
+
     // Use setTimeout to allow the browser to update the UI with the loading state
     setTimeout(() => {
         try {
-            const { 
-                useSubcontractor, subcontractorCost, workers, hours, days, materialsPerDay, 
+            const {
+                useSubcontractor, subcontractorCost, workers, hours, days, materialsPerDay,
                 equipmentPerDay, largeHoods, smallHoods, hoodCleaningFrequency,
-                hoodLaborCostPerc, hoodMaterialCostPerc, isHoliday, outsideHouston, includeInsurance, 
-                config, options 
+                hoodLaborCostPerc, hoodMaterialCostPerc, isHoliday, outsideHouston, includeInsurance,
+                config, options
             } = state;
-            
+
             // Calculate hood cleaning costs first
             let hoodCleaningCost = 0, showHoodCleaning = false;
             let hoodLaborCost = 0, hoodMaterialCost = 0;
-            
+
             if (largeHoods > 0 || smallHoods > 0) {
-                hoodCleaningCost = ((largeHoods * config.largeHoodPrice) + 
-                                  (smallHoods * config.smallHoodPrice)) * hoodCleaningFrequency;
-                
+                hoodCleaningCost = ((largeHoods * config.largeHoodPrice) +
+                    (smallHoods * config.smallHoodPrice)) * hoodCleaningFrequency;
+
                 // Apply quantity discount
                 if (hoodCleaningFrequency > 1) {
                     hoodCleaningCost *= (0.9 - (Math.min(5, hoodCleaningFrequency) - 1) * 0.05);
                 }
-                
+
                 // Calculate hood labor and material costs
                 hoodLaborCost = hoodCleaningCost * (hoodLaborCostPerc / 100);
                 hoodMaterialCost = hoodCleaningCost * (hoodMaterialCostPerc / 100);
-                
+
                 showHoodCleaning = true;
             }
-            
+
             // Regular labor cost calculation
             let supervisors = 0, regularWorkers = workers;
             let regularLaborCost = 0;
-            
+
             if (workers > 0) {
                 if (days === 1 && workers > 1) {
                     supervisors = 1;
                     regularWorkers = workers - 1;
                 }
-                
-                regularLaborCost = (regularWorkers * config.regularPayRate * hours * days) + 
-                                (supervisors * config.supervisorPayRate * hours * days);
+
+                regularLaborCost = (regularWorkers * config.regularPayRate * hours * days) +
+                    (supervisors * config.supervisorPayRate * hours * days);
             }
-            
+
             // Total labor cost (regular labor + hood labor)
             const laborCost = regularLaborCost + hoodLaborCost;
             const laborTax = laborCost * 0.17; // 17% tax on labor costs
-            
+
             // Worker's Compensation
             const workCompCost = includeInsurance ? (laborCost * config.workCompRate / 100) : 0;
-            
+
             // Transport cost calculation
             let transportCost = 0;
             if (options.includeTransport) {
                 // Choose appropriate transport cost based on location
-                const dailyTransportCost = outsideHouston ? 
+                const dailyTransportCost = outsideHouston ?
                     config.outsideHoustonTransportCostPerDay : config.transportCostPerDay;
                 transportCost = dailyTransportCost * days;
-                
+
                 // Apply discounts for longer contracts
                 if (days > 7) transportCost *= 0.8;
                 if (days > 21) transportCost *= 0.7;
             }
-            
+
             // Materials and equipment (regular + hood materials)
             const materialsCost = options.includeMaterials ? (materialsPerDay * days) + hoodMaterialCost : hoodMaterialCost;
             const equipmentCost = options.includeEquipment ? equipmentPerDay * days : 0;
-            
+
             // Base costs sum
-            const baseCosts = laborCost + laborTax + workCompCost + transportCost + 
-                            materialsCost + equipmentCost + hoodCleaningCost;
-            
+            const baseCosts = laborCost + laborTax + workCompCost + transportCost +
+                materialsCost + equipmentCost + hoodCleaningCost;
+
             // Operational costs calculation
             const regularSuppliesCost = baseCosts * (options.regularSuppliesPercentage / 100);
             const additionalEquipmentCost = baseCosts * (options.additionalEquipmentPercentage / 100);
             const uniformSafetyCost = baseCosts * (options.uniformSafetyPercentage / 100);
             const communicationsCost = baseCosts * (options.communicationsPercentage / 100);
             const overheadCost = baseCosts * (options.overheadPercentage / 100);
-            
+
             // Total operational costs
-            const operationalCosts = regularSuppliesCost + additionalEquipmentCost + 
-                                  uniformSafetyCost + communicationsCost + overheadCost;
-            
+            const operationalCosts = regularSuppliesCost + additionalEquipmentCost +
+                uniformSafetyCost + communicationsCost + overheadCost;
+
             // Subtotal
             const internalCostSubtotal = baseCosts + operationalCosts;
             const directCosts = internalCostSubtotal;
             const subtotal = internalCostSubtotal;
-            
+
             // Apply residual percentage
             let residualPercentageAmount = 0;
             let adjustedSubtotal = subtotal;
-            
+
             if (options.enableResidualPercentage) {
                 residualPercentageAmount = subtotal * (options.residualPercentageValue / 100);
                 adjustedSubtotal += residualPercentageAmount;
             }
-            
+
             // Calculate markup percentage
             let markupPercentage = calculateMarkupPercentage(days);
-            
+
             // Target cost percentage optimization
             const targetCostPercentage = 62;
             let isOptimizationActive = false;
-            
+
             if (options.enableAutoCostOptimization) {
                 isOptimizationActive = true;
                 markupPercentage = Math.round(((directCosts * 100 / targetCostPercentage) / adjustedSubtotal - 1) * 100);
                 markupPercentage = Math.max(20, markupPercentage);
             }
-            
+
             // Apply markup
             const markup = adjustedSubtotal * (markupPercentage / 100);
-            
+
             // Holiday surcharge
             const totalBeforeHoliday = adjustedSubtotal + markup;
             const holidaySurcharge = isHoliday ? totalBeforeHoliday * 0.25 : 0;
-            
+
             // Total Price (before any rounding, initial fee, or insurance)
             let totalPrice = totalBeforeHoliday + holidaySurcharge;
-            
+
             // Calculate General Liability Insurance
             const generalLiabilityCost = includeInsurance ? (totalPrice * config.glRate / 1000) : 0;
-            
+
             // Initial Fee
             let initialFeeAmount = options.enableInitialFee ? options.initialFeeValue : 0;
-            
+
             // Calculate grand total with rounding
             let preRoundingTotal = totalPrice + generalLiabilityCost + initialFeeAmount;
             let roundingAdjustment = 0;
             let grandTotal = preRoundingTotal;
-            
+
             if (options.enableRounding) {
                 const roundedTotal = roundAmount(preRoundingTotal, 'up', 50);
                 roundingAdjustment = roundedTotal - preRoundingTotal;
                 grandTotal = roundedTotal;
             }
-            
+
             // Calculate cost and profit percentages
             let totalCostPercentage = 0;
             let extraBenefit = 0;
-            
+
             if (useSubcontractor) {
                 totalCostPercentage = Math.round((subcontractorCost / totalPrice) * 100);
                 extraBenefit = internalCostSubtotal - subcontractorCost;
             } else {
                 totalCostPercentage = Math.round((directCosts / totalPrice) * 100);
             }
-            
+
             const totalProfitPercentage = 100 - totalCostPercentage;
             const isTargetAchieved = (totalCostPercentage === targetCostPercentage);
-            
+
             // Net profit calculation
             let netProfit = 0;
             if (useSubcontractor) {
@@ -1807,11 +1807,11 @@ function calculateAll() {
             } else {
                 netProfit = grandTotal - directCosts;
             }
-            
+
             // Sales commission calculation
             let salesCommission = 0;
             let splitCommissions = [];
-            
+
             if (options.enableCommissionSplit) {
                 // Calculate each split commission
                 let totalCommissionPercentage = 0;
@@ -1820,17 +1820,17 @@ function calculateAll() {
                     const commissionAmount = netProfit * (percentage / 100);
                     return { percentage, amount: commissionAmount };
                 });
-                
+
                 // Total commission amount
                 salesCommission = netProfit * (totalCommissionPercentage / 100);
             } else {
                 // Standard commission
                 salesCommission = netProfit * (options.commissionPercentage / 100);
             }
-            
+
             // Final profit
             const finalCompanyProfit = netProfit - salesCommission;
-            
+
             // Save results in state for easier access
             state.results = {
                 laborCost,
@@ -1861,10 +1861,10 @@ function calculateAll() {
                 isOptimizationActive,
                 isTargetAchieved
             };
-            
+
             // Update UI based on calculations
             updateUIForSubcontractor(useSubcontractor, internalCostSubtotal, subcontractorCost, extraBenefit);
-            
+
             // Show/hide rows based on conditions
             setDisplay('holidayRow', isHoliday);
             setDisplay('hoodCleaningRow', showHoodCleaning);
@@ -1876,7 +1876,7 @@ function calculateAll() {
             setDisplay('grandTotalRow', true); // Always show
             setDisplay('salesCommissionRow', !options.enableCommissionSplit);
             setDisplay('splitCommissionRows', options.enableCommissionSplit);
-            
+
             // Update split commission displays
             if (options.enableCommissionSplit) {
                 updateCommissionSplitDisplay(splitCommissions);
@@ -1884,11 +1884,11 @@ function calculateAll() {
                 setContent('totalCommissionSplitDisplay', totalSplitPercent);
                 setContent('totalSplitCommission', formatCurrency(salesCommission));
             }
-            
+
             // Show/hide optimization indicators
             setDisplay('optimizationBadge', isOptimizationActive);
             setDisplay('targetAchievedBadge', isTargetAchieved);
-            
+
             // Update operational costs display
             setContent('operationalCostsValue', formatCurrency(operationalCosts));
             setContent('regularSuppliesValue', formatCurrency(regularSuppliesCost));
@@ -1896,45 +1896,45 @@ function calculateAll() {
             setContent('uniformSafetyValue', formatCurrency(uniformSafetyCost));
             setContent('communicationsValue', formatCurrency(communicationsCost));
             setContent('overheadValue', formatCurrency(overheadCost));
-            
+
             if (options.enableInitialFee) {
                 setContent('initialFeeAmount', formatCurrency(initialFeeAmount));
             }
-            
+
             if (options.enableResidualPercentage) {
                 setContent('residualPercentageDisplay', options.residualPercentageValue);
                 setContent('residualPercentageAmount', formatCurrency(residualPercentageAmount));
             }
-            
+
             // Display rounding details
             if (options.enableRounding) {
                 setHTML('roundingDetails', 'Rounding Grand Total up to the next $50');
             }
-            
+
             // Subcontractor UI updates
             setDisplay('subcontractorRow', useSubcontractor);
             setDisplay('extraBenefitRow', useSubcontractor);
-            
+
             // Operational costs details display
             setDisplay('operationalCostsDetails', $('operationalCostsRow').classList.contains('expanded'));
             setDisplay('regularSuppliesRow', !useSubcontractor, 'flex');
             setDisplay('additionalEquipmentRow', !useSubcontractor, 'flex');
             setDisplay('uniformSafetyRow', !useSubcontractor, 'flex');
-            
+
             // Cost percentage display
             setContent('totalCostPercentage', `${totalCostPercentage}%`);
             setContent('totalProfitPercentage', `${totalProfitPercentage}%`);
             $('costPercentageFill').style.width = `${totalCostPercentage}%`;
             $('costPercentageFill').setAttribute('aria-valuenow', totalCostPercentage);
             setContent('percentageTextOverlay', `${totalCostPercentage}%`);
-            
+
             // Update total and grand total
             setContent('totalPrice', formatCurrency(totalPrice));
             setContent('generalLiabilityCost', formatCurrency(generalLiabilityCost));
             setContent('workCompCost', formatCurrency(workCompCost));
             setContent('roundingAdjustment', formatCurrency(roundingAdjustment));
             setContent('grandTotal', formatCurrency(grandTotal));
-            
+
             // Update cost display
             setContent('laborCost', formatCurrency(laborCost));
             setContent('laborTax', formatCurrency(laborTax));
@@ -1951,7 +1951,7 @@ function calculateAll() {
             setContent('salesCommission', formatCurrency(salesCommission));
             setContent('finalCompanyProfit', formatCurrency(finalCompanyProfit));
             setContent('profitMarkup', formatCurrency(markup));
-            
+
             // Set color of cost percentage bar based on value
             if (totalCostPercentage > 75) {
                 $('costPercentageFill').style.backgroundColor = '#e74c3c';
@@ -1966,12 +1966,12 @@ function calculateAll() {
                 $('finalCompanyProfit').classList.remove('low-profit');
                 $('finalCompanyProfit').classList.add('high-profit');
             }
-            
+
             // Special coloring for 62% target
             if (isTargetAchieved) {
                 $('costPercentageFill').style.backgroundColor = 'var(--optimize-color)';
             }
-            
+
             // Set markup details text based on option
             let markupDetailsText = '';
             if (isOptimizationActive) {
@@ -1985,13 +1985,13 @@ function calculateAll() {
                 $('markupRow').classList.remove('optimization-active');
             }
             setHTML('markupDetails', markupDetailsText);
-            
+
             // Highlight key values that have changed
             highlightElement('grandTotal');
             highlightElement('finalCompanyProfit');
             highlightElement('netProfit');
             highlightElement('totalCostPercentage');
-            
+
             // Clear loading state
             setLoadingState(false);
         } catch (error) {
@@ -2011,7 +2011,7 @@ function calculateAll() {
 function preparePdfOrPrint(mode) {
     // Add date stamp for printing
     document.querySelector('.profit-section').setAttribute('data-print-date', new Date().toLocaleDateString());
-    
+
     if (mode === 'print') {
         // Show print preview modal first
         showPrintPreview();
@@ -2026,7 +2026,7 @@ function preparePdfOrPrint(mode) {
 function showPrintPreview() {
     // Check if modal exists
     let modal = $('printPreviewModal');
-    
+
     // Create modal if it doesn't exist
     if (!modal) {
         modal = document.createElement('div');
@@ -2049,41 +2049,41 @@ function showPrintPreview() {
             </div>
         `;
         document.body.appendChild(modal);
-        
+
         // Add event listeners for the new modal
         modal.querySelector('.close-modal').addEventListener('click', () => {
             modal.classList.remove('visible');
             setTimeout(() => { modal.style.display = 'none'; }, 300);
         });
-        
+
         $('cancelPrintBtn').addEventListener('click', () => {
             modal.classList.remove('visible');
             setTimeout(() => { modal.style.display = 'none'; }, 300);
         });
-        
+
         $('confirmPrintBtn').addEventListener('click', () => {
             modal.classList.remove('visible');
-            setTimeout(() => { 
+            setTimeout(() => {
                 modal.style.display = 'none';
                 window.print();
             }, 300);
         });
     }
-    
+
     // Clone summary content for preview
     const previewContent = $('printPreviewContent');
     previewContent.innerHTML = '';
-    
+
     const contentClone = $('summaryContent').cloneNode(true);
-    
+
     // Remove action buttons from clone
     const actionButtons = contentClone.querySelector('.action-buttons');
     if (actionButtons) {
         actionButtons.remove();
     }
-    
+
     previewContent.appendChild(contentClone);
-    
+
     // Show the modal
     modal.style.display = 'block';
     setTimeout(() => modal.classList.add('visible'), 10);
@@ -2095,21 +2095,21 @@ function showPrintPreview() {
 function generatePDF() {
     // Check if jsPDF is available
     const jsPdfAvailable = typeof window.jspdf !== 'undefined' || typeof jsPDF !== 'undefined';
-     
+
     if (jsPdfAvailable) {
         // Generate PDF when jsPDF is loaded
         showNotification("Preparing PDF...", "info");
-        
+
         try {
             // Create a clone of results section
             const quoteSummary = document.querySelector('#summaryContent').cloneNode(true);
-            
+
             // Remove action buttons from the clone
             const actionButtons = quoteSummary.querySelector('.action-buttons');
             if (actionButtons) {
                 actionButtons.remove();
             }
-            
+
             // Style modifications for PDF
             const elements = quoteSummary.querySelectorAll('.result-section, .profit-section');
             elements.forEach(el => {
@@ -2117,10 +2117,10 @@ function generatePDF() {
                 el.style.boxShadow = 'none';
                 el.style.border = '1px solid #ccc';
             });
-            
+
             // Create quote number
             const quoteNumber = 'PFS-' + new Date().getFullYear() + '-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-            
+
             // Create and format current date
             const currentDate = new Date();
             const formattedDate = currentDate.toLocaleDateString('en-US', {
@@ -2128,7 +2128,7 @@ function generatePDF() {
                 month: 'long',
                 day: 'numeric'
             });
-            
+
             // Set up PDF document
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({
@@ -2137,29 +2137,29 @@ function generatePDF() {
                 format: 'a4',
                 compress: true
             });
-            
+
             // Define colors
             const brandBlue = '#03143A';
             const brandRed = '#C70532';
-            
+
             // Add logo and header
             doc.setFillColor(brandBlue);
             doc.rect(0, 0, doc.internal.pageSize.getWidth(), 80, 'F');
-            
+
             doc.setTextColor(255);
             doc.setFontSize(22);
             doc.setFont('helvetica', 'bold');
             doc.text('Prime Facility Services Group', 40, 35);
-            
+
             doc.setFontSize(16);
             doc.setFont('helvetica', 'normal');
             doc.text('Professional Kitchen Cleaning Quote', 40, 60);
-            
+
             // Add quote details
             doc.setTextColor(80);
             doc.setFillColor(245, 245, 245);
             doc.rect(0, 80, doc.internal.pageSize.getWidth(), 60, 'F');
-            
+
             doc.setFontSize(12);
             doc.text(`Quote #: ${quoteNumber}`, 40, 100);
             doc.text(`Date: ${formattedDate}`, 40, 120);
@@ -2168,7 +2168,7 @@ function generatePDF() {
                 month: 'long',
                 day: 'numeric'
             })}`, 300, 100);
-            
+
             // Use html2canvas to render the quote content
             html2canvas(quoteSummary, {
                 scale: 2,
@@ -2180,40 +2180,40 @@ function generatePDF() {
                 const imgData = canvas.toDataURL('image/png');
                 const imgWidth = 520;
                 const imgHeight = canvas.height * imgWidth / canvas.width;
-                
+
                 doc.addImage(imgData, 'PNG', 40, 160, imgWidth, imgHeight);
-                
+
                 // Add Terms & Conditions
                 const footerY = 160 + imgHeight + 40;
-                
+
                 if (footerY < doc.internal.pageSize.getHeight() - 100) {
                     // Add terms and conditions
                     doc.setFillColor(245, 245, 245);
                     doc.rect(40, footerY, 520, 80, 'F');
-                    
+
                     doc.setFontSize(10);
                     doc.setTextColor(80);
                     doc.setFont('helvetica', 'bold');
                     doc.text('Terms & Conditions:', 50, footerY + 20);
-                    
+
                     doc.setFont('helvetica', 'normal');
                     doc.text('This quote is valid for 30 days. Payment terms: 50% deposit, balance due upon completion.', 50, footerY + 40);
                     doc.text('All services are subject to our standard terms and conditions available upon request.', 50, footerY + 55);
                     doc.text('Please contact us with any questions or to schedule your service.', 50, footerY + 70);
                 }
-                
+
                 // Add contact information
                 doc.setDrawColor(200);
                 doc.line(40, doc.internal.pageSize.getHeight() - 50, doc.internal.pageSize.getWidth() - 40, doc.internal.pageSize.getHeight() - 50);
-                
+
                 doc.setFontSize(9);
                 doc.setTextColor(100);
                 doc.text('Prime Facility Services Group | Phone: (713) 555-7890 | Email: info@primefacilityservices.com', doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 30, { align: 'center' });
                 doc.text('www.primefacilityservicesgroup.com', doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 15, { align: 'center' });
-                
+
                 // Save the PDF
                 doc.save(`kitchen-cleaning-quote-${quoteNumber}.pdf`);
-                
+
                 showNotification("PDF generated successfully!", "success");
             }).catch(err => {
                 console.error('Error generating PDF:', err);
@@ -2238,13 +2238,13 @@ function captureScreenshot() {
             showNotification("Screenshot functionality requires the html2canvas library, which is not loaded.", "warning");
             return;
         }
-        
+
         // Show loading notification
         showNotification("Creating screenshot...", "info");
-        
+
         // Get the quote summary section
         const element = document.getElementById('summaryContent');
-        
+
         // Use html2canvas to create a screenshot
         html2canvas(element, {
             scale: 2,
@@ -2257,28 +2257,28 @@ function captureScreenshot() {
             const modal = document.getElementById('screenshotModal');
             modal.style.display = 'block';
             setTimeout(() => modal.classList.add('visible'), 10);
-            
+
             // Clear previous screenshot
             const container = document.getElementById('screenshotContainer');
             container.innerHTML = '';
-            
+
             // Add the canvas to the modal
             canvas.style.width = '100%';
             canvas.style.height = 'auto';
             canvas.style.borderRadius = '8px';
             canvas.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
             container.appendChild(canvas);
-            
+
             // Set up download link
             const downloadLink = document.getElementById('downloadLink');
-            
+
             // Create quote number for filename
             const quoteNumber = 'PFS-' + new Date().getFullYear() + '-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-            
+
             // Set download attributes
             downloadLink.href = canvas.toDataURL('image/png');
             downloadLink.download = `kitchen-cleaning-quote-${quoteNumber}.png`;
-            
+
             showNotification("Screenshot created successfully!", "success");
         }).catch(error => {
             console.error('Screenshot error:', error);
@@ -2313,11 +2313,11 @@ function addLoadingIndicator() {
 function addUndoRedoButtons() {
     // Check if buttons already exist
     if ($('undoBtn')) return;
-    
+
     // Find the tab navigation area
     const tabNav = document.querySelector('.nav-tabs');
     if (!tabNav) return;
-    
+
     // Create undo button
     const undoBtn = document.createElement('button');
     undoBtn.id = 'undoBtn';
@@ -2327,17 +2327,17 @@ function addUndoRedoButtons() {
     undoBtn.setAttribute('aria-label', 'Undo last change');
     undoBtn.innerHTML = '<i class="fas fa-undo"></i>';
     undoBtn.addEventListener('click', undo);
-    
+
     // Create redo button
     const redoBtn = document.createElement('button');
     redoBtn.id = 'redoBtn';
     redoBtn.className = 'nav-tab nav-tab-action';
-    redoBtn.disabled = true; 
+    redoBtn.disabled = true;
     redoBtn.setAttribute('aria-disabled', true);
     redoBtn.setAttribute('aria-label', 'Redo last change');
     redoBtn.innerHTML = '<i class="fas fa-redo"></i>';
     redoBtn.addEventListener('click', redo);
-    
+
     // Add buttons before the dark mode toggle
     tabNav.insertBefore(undoBtn, $('darkModeToggle'));
     tabNav.insertBefore(redoBtn, $('darkModeToggle'));
@@ -2350,7 +2350,7 @@ function enhanceAccessibility() {
     // Add proper roles to main elements
     const container = document.querySelector('.container');
     if (container) container.setAttribute('role', 'application');
-    
+
     // Add accessibility attributes to form elements
     document.querySelectorAll('input, select').forEach(el => {
         if (!el.hasAttribute('aria-label') && !el.getAttribute('id')) {
@@ -2360,19 +2360,19 @@ function enhanceAccessibility() {
             }
         }
     });
-    
+
     // Make expandable sections accessible
     document.querySelectorAll('.toggle-section').forEach(btn => {
         const targetId = btn.getAttribute('data-target');
         const target = $(targetId);
-        
+
         if (target && btn) {
             btn.setAttribute('aria-expanded', !target.classList.contains('hidden-section'));
             btn.setAttribute('aria-controls', targetId);
             target.setAttribute('aria-hidden', target.classList.contains('hidden-section'));
         }
     });
-    
+
     // Enhance options accessibility
     document.querySelectorAll('.profit-option').forEach(option => {
         option.setAttribute('role', 'option');
@@ -2383,7 +2383,7 @@ function enhanceAccessibility() {
             option.setAttribute('aria-disabled', 'true');
         }
     });
-    
+
     // Make tooltips accessible
     document.querySelectorAll('.tooltip').forEach(tooltip => {
         tooltip.setAttribute('role', 'tooltip');
@@ -2397,37 +2397,37 @@ function enhanceAccessibility() {
 function initApp() {
     // Add loading indicator
     addLoadingIndicator();
-    
+
     // Add undo/redo buttons
     addUndoRedoButtons();
-    
+
     // Initialize event listeners
     initEventListeners();
-    
+
     // Initialize validation
     initValidation();
-    
+
     // Enhance accessibility
     enhanceAccessibility();
-    
+
     // Update UI labels from config
     updateHoodPriceLabels();
-    
+
     // Check dark mode preference
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         toggleDarkMode();
     }
-    
+
     // Perform initial calculation
     calculateAll();
-    
+
     // Check for missing required libraries
     const support = checkBrowserSupport();
-    
+
     if (!support.html2canvas || !support.jsPDF) {
         console.warn('Some export libraries not loaded. PDF or screenshot functionality may be limited.');
     }
-    
+
     // Welcome notification for first-time users
     if (support.localStorage) {
         if (!localStorage.getItem('welcomeShown')) {
